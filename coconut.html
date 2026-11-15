@@ -48,6 +48,8 @@ h1{font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1.
 .ta{color:var(--muted);font-size:15px}
 .lock{margin-left:auto;flex:none;height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
 
+.who{margin:-4px 0 0;font-size:15px;color:var(--muted)}
+.who b{color:var(--ink);font-weight:600}
 .note{font-size:14px;color:var(--muted);background:var(--soft);border-radius:10px;padding:8px 12px;margin:0}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:22px}
@@ -130,6 +132,8 @@ input.invalid{border-color:var(--bad)}
     </div>
     <button type="button" class="lock" id="lock-btn" hidden>Lock</button>
   </header>
+
+  <p class="who" id="who-bar" hidden>Saving as <b id="who-name"></b></p>
 
   <p class="note" id="mode-note" hidden>Preview: entries stay on this page and are not sent to Google Sheets.</p>
 
@@ -224,15 +228,15 @@ input.invalid{border-color:var(--bad)}
       <div class="row"><span class="k">Coconuts used</span><span class="v" id="s-count"></span></div>
       <div class="row"><span class="k">Coconuts damaged</span><span class="v" id="s-damage"></span></div>
       <div class="row"><span class="k">Shell weight</span><span class="v" id="s-shell"></span></div>
+      <div class="row"><span class="k">Saved by</span><span class="v" id="s-by"></span></div>
     </div>
     <button type="button" class="ghost" id="again">Back to log</button>
   </section>
 </main>
 
+<script src="config.js"></script>
 <script>
-/* ===== SETUP: paste your Apps Script web app link (ends in /exec) between the quotes ===== */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzEa6CfSI15t1iB10negidzN_bba-w_oUNM_AZuxv1uJqgShwVyXhzcygu4tQ8KiipccA/exec';
-/* ========================================================================================= */
+const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LINK';   // set in config.js
 
 (function(){
   const $ = id => document.getElementById(id);
@@ -250,8 +254,9 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzEa6CfSI15t1iB10negidz
   let loadToken = 0, fromServer = false, edited = false, hasEntry = false;
 
   /* ---------- helpers ---------- */
-  function remember(v){ try { v ? localStorage.setItem(PIN_KEY, v) : localStorage.removeItem(PIN_KEY); } catch (e) {} }
-  function recall(){ try { return localStorage.getItem(PIN_KEY) || ''; } catch (e) { return ''; } }
+  // The PIN is asked every time the page opens and is never stored on the phone.
+  try { localStorage.removeItem(PIN_KEY); } catch (e) {}   // clears a PIN saved by the older version
+  let me = null;   // who is logged in: {name, role}
 
   // Sends a request to the Apps Script (Code.gs) and returns its data.
   // No Google sign-in is sent (credentials: 'omit'), so several logged-in Google accounts don't matter.
@@ -313,10 +318,10 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzEa6CfSI15t1iB10negidz
   async function tryPin(p){
     pinBusy = true; setKeypad(false); setPinMsg('Checking…');
     try {
-      await call('checkPin', {pin: p});
-      pin = p; remember(p);
+      const who = await call('login', {pin: p, page: 'coconut'});
+      pin = p;
       typed = ''; renderDots(); setPinMsg('');
-      showApp();
+      showApp(who);
     } catch (err) {
       typed = ''; renderDots(); wrongShake();
       setPinMsg(errText(err), true);
@@ -334,14 +339,16 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzEa6CfSI15t1iB10negidz
   });
 
   function showLogin(message, bad){
-    pin = ''; remember('');
+    pin = ''; me = null; $('who-bar').hidden = true;
     typed = ''; renderDots();
     form.hidden = true; $('saved').hidden = true; $('lock-btn').hidden = true;
     $('login-view').hidden = false;
     setPinMsg(message || '', bad);
   }
 
-  function showApp(){
+  function showApp(who){
+    me = who || me;
+    if (me && me.name){ $('who-name').textContent = me.name; $('who-bar').hidden = false; }
     $('login-view').hidden = true; $('saved').hidden = true;
     form.hidden = false; $('lock-btn').hidden = false;
     resetForm();
@@ -389,7 +396,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzEa6CfSI15t1iB10negidz
       if (e){
         if (!edited || fromServer){ fill(e); fromServer = true; edited = false; }
         hasEntry = true;
-        setStatus('Already saved' + (e.savedAt ? ' at ' + e.savedAt : '') + '. Saving again will update it.', 'exists');
+        setStatus('Already saved' + (e.savedAt ? ' at ' + e.savedAt : '') + (e.savedBy ? ' by ' + e.savedBy : '') + '. Saving again will update it.', 'exists');
       } else {
         if (fromServer){ clearNumbers(); }
         fromServer = false; edited = false; hasEntry = false;
@@ -470,6 +477,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzEa6CfSI15t1iB10negidz
       $('s-count').textContent = entry.coconutsUsed.toLocaleString('en-IN');
       $('s-damage').textContent = entry.coconutsDamaged.toLocaleString('en-IN');
       $('s-shell').textContent = entry.shellKg.toLocaleString('en-IN', {maximumFractionDigits:2}) + ' kg';
+      $('s-by').textContent = (res && res.by) || (me && me.name) || '';
       form.hidden = true; $('saved').hidden = false;
     } catch (err) {
       if (isPinError(err)) { showLogin(errText(err), true); return; }
@@ -485,15 +493,6 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzEa6CfSI15t1iB10negidz
   if (!API_READY){
     setKeypad(false);
     setPinMsg('This page is not connected yet: add the Apps Script link (API_URL) in index.html.', true);
-  } else {
-    const saved = recall();
-    if (saved && saved.length === PIN_LENGTH){
-      pinBusy = true; setKeypad(false); setPinMsg('Opening…');
-      call('checkPin', {pin: saved})
-        .then(() => { pin = saved; showApp(); })
-        .catch(err => { if (isPinError(err)) remember(''); setPinMsg(isPinError(err) ? 'Enter the PIN to continue.' : errText(err), !isPinError(err)); })
-        .finally(() => { pinBusy = false; setKeypad(true); });
-    }
   }
 })();
 </script>

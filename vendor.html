@@ -111,6 +111,8 @@ input.caps{text-transform:uppercase}
 .key:active{background:var(--surface2)}
 .key:disabled{opacity:.5;cursor:default}
 .key:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.who{margin-left:auto;color:var(--text);font-weight:600}
+.who + .lockbtn{margin-left:10px}
 .lockbtn{margin-left:auto;height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .save-err{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--coral)}
@@ -125,9 +127,9 @@ input.caps{text-transform:uppercase}
 
 <section class="pin" id="pinView" aria-labelledby="pinTitle">
   <header class="top">
-    <div class="eyebrow"><i aria-hidden="true"></i>LS · Owner</div>
-    <h1 id="pinTitle">Owner PIN</h1>
-    <p class="ta-sub" lang="ta">உரிமையாளர் PIN எண்</p>
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Vendors</div>
+    <h1 id="pinTitle">Enter your PIN</h1>
+    <p class="ta-sub" lang="ta">உங்கள் PIN எண்</p>
   </header>
   <div class="dots" id="dots" aria-hidden="true">
     <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -150,7 +152,7 @@ input.caps{text-transform:uppercase}
 </section>
 
 <header class="top" id="formHead" hidden>
-  <div class="eyebrow"><i aria-hidden="true"></i>LS · Vendors<button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
+  <div class="eyebrow"><i aria-hidden="true"></i>LS · Vendors<span class="who" id="whoName"></span><button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
   <h1>New vendor</h1>
   <p class="ta-sub" lang="ta">புதிய விற்பனையாளர்</p>
 </header>
@@ -168,7 +170,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="contact">
-    <label class="label" for="contact"><span>Contact name</span><span class="label-ta" lang="ta">தொடர்பு நபர்</span></label>
+    <label class="label" for="contact"><span>Contact name<span class="opt">Optional</span></span><span class="label-ta" lang="ta">தொடர்பு நபர்</span></label>
     <div class="control">
       <input id="contact" name="contact" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" aria-describedby="contact-err">
       <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
@@ -197,7 +199,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="upi">
-    <label class="label" for="upi"><span>UPI phone number</span><span class="label-ta" lang="ta">UPI போன் எண்</span></label>
+    <label class="label" for="upi"><span>UPI phone number<span class="opt">Optional</span></span><span class="label-ta" lang="ta">UPI போன் எண்</span></label>
     <div class="control">
       <span class="prefix" aria-hidden="true">+91</span>
       <input id="upi" name="upi" class="num" type="tel" inputmode="numeric" enterkeyhint="next" placeholder="98765 43210" aria-describedby="upi-err">
@@ -207,7 +209,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="address">
-    <label class="label" for="address"><span>Address</span><span class="label-ta" lang="ta">முகவரி</span></label>
+    <label class="label" for="address"><span>Address<span class="opt">Optional</span></span><span class="label-ta" lang="ta">முகவரி</span></label>
     <div class="control area">
       <textarea id="address" name="address" rows="3" autocomplete="street-address" aria-describedby="address-err"></textarea>
       <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
@@ -225,7 +227,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="acct">
-    <label class="label" for="acct"><span>Bank account number</span><span class="label-ta" lang="ta">வங்கி கணக்கு எண்</span></label>
+    <label class="label" for="acct"><span>Bank account number<span class="opt">Optional</span></span><span class="label-ta" lang="ta">வங்கி கணக்கு எண்</span></label>
     <div class="control">
       <input id="acct" name="acct" class="num" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" aria-describedby="acct-err">
       <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
@@ -234,7 +236,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="ifsc">
-    <label class="label" for="ifsc"><span>IFSC code</span><span class="label-ta" lang="ta">IFSC குறியீடு</span></label>
+    <label class="label" for="ifsc"><span>IFSC code<span class="opt">Optional</span></span><span class="label-ta" lang="ta">IFSC குறியீடு</span></label>
     <div class="control">
       <input id="ifsc" name="ifsc" class="num caps" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next" maxlength="11" placeholder="SBIN0001234" aria-describedby="ifsc-err">
       <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
@@ -243,7 +245,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="bank">
-    <label class="label" for="bank"><span>Bank name</span><span class="label-ta" lang="ta">வங்கி பெயர்</span></label>
+    <label class="label" for="bank"><span>Bank name<span class="opt">Optional</span></span><span class="label-ta" lang="ta">வங்கி பெயர்</span></label>
     <div class="control">
       <input id="bank" name="bank" type="text" autocapitalize="words" enterkeyhint="next" aria-describedby="bank-err">
       <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
@@ -252,7 +254,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="credit">
-    <label class="label" for="credit"><span>Opening credit</span><span class="label-ta" lang="ta">ஆரம்ப நிலுவை</span></label>
+    <label class="label" for="credit"><span>Opening credit<span class="opt">Optional</span></span><span class="label-ta" lang="ta">ஆரம்ப நிலுவை</span></label>
     <div class="control">
       <span class="prefix" aria-hidden="true">₹</span>
       <input id="credit" name="credit" class="num" type="text" inputmode="numeric" enterkeyhint="done" maxlength="12" placeholder="0" aria-describedby="credit-err">
@@ -310,10 +312,9 @@ input.caps{text-transform:uppercase}
 <p class="sr" id="live" aria-live="polite"></p>
 </div>
 
+<script src="config.js"></script>
 <script>
-/* ===== SETUP: paste your Apps Script web app link (ends in /exec) between the quotes ===== */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5SxQqupaLUyVyvsZYPyTVnkKL1XltJ6jJl4YU_mcuin7UqDw/exec';
-/* ========================================================================================= */
+const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LINK';   // set in config.js
 </script>
 <script>
 (function () {
@@ -356,13 +357,14 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
   }
   function cleanIfsc(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11); }
 
+  function hasBank() { return digits(f.acct.value) !== '' || cleanIfsc(f.ifsc.value) !== ''; }
   var rules = {
     name: function () { return f.name.value.trim().length >= 2 ? '' : 'Type the vendor name'; },
-    contact: function () { return f.contact.value.trim().length >= 2 ? '' : 'Type the contact name'; },
+    contact: function () { return ''; },
     phone: function () { return mobileMsg(digits(f.phone.value)); },
     wa: function () { return mobileMsg(digits(f.wa.value)); },
-    upi: function () { return mobileMsg(digits(f.upi.value)); },
-    address: function () { return f.address.value.trim().length >= 6 ? '' : 'Type the address'; },
+    upi: function () { var d = digits(f.upi.value); return d ? mobileMsg(d) : ''; },
+    address: function () { return ''; },
     fssai: function () {
       var d = digits(f.fssai.value);
       if (!d) return '';
@@ -370,17 +372,17 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
     },
     acct: function () {
       var d = digits(f.acct.value);
-      if (!d) return 'Type the account number';
+      if (!d) return hasBank() ? 'Type the account number' : '';
       return d.length >= 9 && d.length <= 18 ? '' : 'Account numbers have 9 to 18 digits, you have typed ' + d.length;
     },
     ifsc: function () {
       var v = cleanIfsc(f.ifsc.value);
-      if (!v) return 'Type the IFSC code';
+      if (!v) return hasBank() ? 'Type the IFSC code' : '';
       if (v.length < 11) return 'IFSC has 11 characters, you have typed ' + v.length;
       return /^[A-Z]{4}0[A-Z0-9]{6}$/.test(v) ? '' : 'IFSC looks like SBIN0001234 (5th character is 0)';
     },
-    bank: function () { return f.bank.value.trim().length >= 2 ? '' : 'Type the bank name'; },
-    credit: function () { return f.credit.value.trim() === '' ? 'Type the amount' : ''; }
+    bank: function () { return f.bank.value.trim().length >= 2 || !hasBank() ? '' : 'Type the bank name'; },
+    credit: function () { return ''; }
   };
 
   function fieldEl(k) { return document.querySelector('[data-field="' + k + '"]'); }
@@ -446,10 +448,10 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
   });
 
   order.forEach(function (k) {
-    f[k].addEventListener('input', function () { refresh(k); });
+    f[k].addEventListener('input', function () { if (k === 'acct' || k === 'ifsc' || k === 'bank') { ['acct', 'ifsc', 'bank'].forEach(refresh); } else { refresh(k); } });
     f[k].addEventListener('blur', function () {
       if (f[k].value.trim() !== '') touched[k] = true;
-      refresh(k);
+      if (k === 'acct' || k === 'ifsc' || k === 'bank') { ['acct', 'ifsc', 'bank'].forEach(refresh); } else { refresh(k); }
     });
   });
 
@@ -482,6 +484,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
     save();
   });
 
+  function dash(el, text) { el.textContent = text || '—'; el.classList.toggle('muted', !text); }
   function showDone(res) {
     var updated = !!(res && res.updated);
     $('doneTitle').textContent = updated ? 'Vendor updated' : 'Vendor added';
@@ -495,18 +498,19 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
 
     $('vName').textContent = f.name.value.trim();
     $('vContact').textContent = f.contact.value.trim();
+    $('vContact').hidden = !f.contact.value.trim();
     $('vPhone').textContent = '+91 ' + fmtPhone(ph);
     $('vPhone').href = 'tel:+91' + ph;
     $('vWa').textContent = '+91 ' + fmtPhone(wa);
     $('vWa').href = 'https://wa.me/91' + wa;
-    $('vUpi').textContent = '+91 ' + fmtPhone(upi);
-    $('vAddr').textContent = f.address.value.trim();
+    dash($('vUpi'), upi ? '+91 ' + fmtPhone(upi) : '');
+    dash($('vAddr'), f.address.value.trim());
     var fs = $('vFssai');
     fs.textContent = fssai || '—';
     fs.classList.toggle('muted', !fssai);
-    $('vAcct').textContent = fmtAcct(digits(f.acct.value));
-    $('vIfsc').textContent = cleanIfsc(f.ifsc.value);
-    $('vBank').textContent = f.bank.value.trim();
+    dash($('vAcct'), fmtAcct(digits(f.acct.value)));
+    dash($('vIfsc'), cleanIfsc(f.ifsc.value));
+    dash($('vBank'), f.bank.value.trim());
     $('vCredit').textContent = '₹' + credit.toLocaleString('en-IN');
 
     form.hidden = true;
@@ -563,20 +567,20 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
       acct: digits(f.acct.value),
       ifsc: cleanIfsc(f.ifsc.value),
       bank: f.bank.value.trim(),
-      credit: digits(f.credit.value)
+      credit: digits(f.credit.value) || '0'
     } };
   }
 
   /* ---------- Owner PIN and saving to the sheet ---------- */
   var MOCK = window.__LS_MOCK__ || null;   // preview only
   var API_READY = !!MOCK || /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(API_URL);
-  var PIN_KEY = 'ls-owner-pin', PIN_LENGTH = 6;
+  var OLD_PIN_KEY = 'ls-owner-pin', PIN_LENGTH = 6;
   var pin = '', typed = '', pinBusy = false, savedId = '', saving = false;
   var pinView = $('pinView'), lockBtn = $('lockBtn');
   if (window.__LS_PREVIEW__) $('modeNote').hidden = false;
 
-  function remember(v) { try { if (v) { localStorage.setItem(PIN_KEY, v); } else { localStorage.removeItem(PIN_KEY); } } catch (e) {} }
-  function recall() { try { return localStorage.getItem(PIN_KEY) || ''; } catch (e) { return ''; } }
+  // The PIN is asked every time the page opens and is never stored on the phone.
+  try { localStorage.removeItem(OLD_PIN_KEY); } catch (e) {}   // clears a PIN saved by the older version
 
   // Sends a request to the Apps Script (Code.gs) and returns its data.
   // No Google sign-in is sent (credentials: 'omit'), so several logged-in Google accounts don't matter.
@@ -625,10 +629,10 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
   async function tryPin(p) {
     pinBusy = true; setKeypad(false); setPinMsg('Checking…');
     try {
-      await call('checkOwnerPin', { pin: p });
-      pin = p; remember(p);
+      var me = await call('login', { pin: p, page: 'vendors' });
+      pin = p;
       typed = ''; renderDots(); setPinMsg('');
-      showApp();
+      showApp(me);
     } catch (err) {
       typed = ''; renderDots(); wrongShake();
       setPinMsg(errText(err), true);
@@ -647,7 +651,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
 
   // Back to the PIN screen. What was typed in the form is kept unless the form was cleared first.
   function showLogin(message, bad) {
-    pin = ''; remember('');
+    pin = '';
     typed = ''; renderDots();
     head.hidden = true; form.hidden = true; done.hidden = true; lockBtn.hidden = true;
     pinView.hidden = false;
@@ -655,7 +659,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
     window.scrollTo(0, 0);
   }
 
-  function showApp() {
+  function showApp(me) {
+    if (me && me.name) $('whoName').textContent = me.name;
     pinView.hidden = true;
     lockBtn.hidden = false;
     head.hidden = false; form.hidden = false; done.hidden = true;
@@ -686,25 +691,13 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
 
   lockBtn.addEventListener('click', function () {
     clearForm();
-    showLogin('Locked. Enter the owner PIN to continue.');
+    showLogin('Locked. Enter your PIN to continue.');
   });
 
   /* ---------- start ---------- */
   if (!API_READY) {
     setKeypad(false);
     setPinMsg('This page is not connected yet: add the Apps Script link (API_URL) in this file.', true);
-  } else {
-    var savedPin = recall();
-    if (savedPin.length === PIN_LENGTH) {
-      pinBusy = true; setKeypad(false); setPinMsg('Opening…');
-      call('checkOwnerPin', { pin: savedPin })
-        .then(function () { pin = savedPin; showApp(); })
-        .catch(function (err) {
-          if (isPinError(err)) remember('');
-          setPinMsg(isPinError(err) ? 'Enter the owner PIN to continue.' : errText(err), !isPinError(err));
-        })
-        .finally(function () { pinBusy = false; setKeypad(true); });
-    }
   }
 })();
 </script>

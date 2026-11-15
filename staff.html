@@ -119,6 +119,8 @@ input.caps{text-transform:uppercase}
 .key:active{background:var(--surface2)}
 .key:disabled{opacity:.5;cursor:default}
 .key:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.who{margin-left:auto;color:var(--text);font-weight:600}
+.who + .lockbtn{margin-left:10px}
 .lockbtn{margin-left:auto;height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .save-err{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--coral)}
@@ -133,9 +135,9 @@ input.caps{text-transform:uppercase}
 
 <section class="pin" id="pinView" aria-labelledby="pinTitle">
   <header class="top">
-    <div class="eyebrow"><i aria-hidden="true"></i>LS · Owner</div>
-    <h1 id="pinTitle">Owner PIN</h1>
-    <p class="ta-sub" lang="ta">உரிமையாளர் PIN எண்</p>
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Staff</div>
+    <h1 id="pinTitle">Enter your PIN</h1>
+    <p class="ta-sub" lang="ta">உங்கள் PIN எண்</p>
   </header>
   <div class="dots" id="dots" aria-hidden="true">
     <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -158,7 +160,7 @@ input.caps{text-transform:uppercase}
 </section>
 
 <header class="top" id="formHead" hidden>
-  <div class="eyebrow"><i aria-hidden="true"></i>LS · Staff<button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
+  <div class="eyebrow"><i aria-hidden="true"></i>LS · Staff<span class="who" id="whoName"></span><button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
   <h1>Add staff</h1>
   <p class="ta-sub" lang="ta">புதிய பணியாளர்</p>
 </header>
@@ -363,10 +365,9 @@ input.caps{text-transform:uppercase}
 <p class="sr" id="live" aria-live="polite"></p>
 </div>
 
+<script src="config.js"></script>
 <script>
-/* ===== SETUP: paste your Apps Script web app link (ends in /exec) between the quotes ===== */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5SxQqupaLUyVyvsZYPyTVnkKL1XltJ6jJl4YU_mcuin7UqDw/exec';
-/* ========================================================================================= */
+const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LINK';   // set in config.js
 </script>
 <script>
 (function () {
@@ -670,13 +671,13 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
   /* ---------- Owner PIN and saving to the sheet ---------- */
   var MOCK = window.__LS_MOCK__ || null;   // preview only
   var API_READY = !!MOCK || /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(API_URL);
-  var PIN_KEY = 'ls-owner-pin', PIN_LENGTH = 6;
+  var OLD_PIN_KEY = 'ls-owner-pin', PIN_LENGTH = 6;
   var pin = '', typed = '', pinBusy = false, savedId = '', saving = false;
   var pinView = $('pinView'), lockBtn = $('lockBtn');
   if (window.__LS_PREVIEW__) $('modeNote').hidden = false;
 
-  function remember(v) { try { if (v) { localStorage.setItem(PIN_KEY, v); } else { localStorage.removeItem(PIN_KEY); } } catch (e) {} }
-  function recall() { try { return localStorage.getItem(PIN_KEY) || ''; } catch (e) { return ''; } }
+  // The PIN is asked every time the page opens and is never stored on the phone.
+  try { localStorage.removeItem(OLD_PIN_KEY); } catch (e) {}   // clears a PIN saved by the older version
 
   // Sends a request to the Apps Script (Code.gs) and returns its data.
   // No Google sign-in is sent (credentials: 'omit'), so several logged-in Google accounts don't matter.
@@ -725,10 +726,10 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
   async function tryPin(p) {
     pinBusy = true; setKeypad(false); setPinMsg('Checking…');
     try {
-      await call('checkOwnerPin', { pin: p });
-      pin = p; remember(p);
+      var me = await call('login', { pin: p, page: 'staff' });
+      pin = p;
       typed = ''; renderDots(); setPinMsg('');
-      showApp();
+      showApp(me);
     } catch (err) {
       typed = ''; renderDots(); wrongShake();
       setPinMsg(errText(err), true);
@@ -747,7 +748,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
 
   // Back to the PIN screen. What was typed in the form is kept unless the form was cleared first.
   function showLogin(message, bad) {
-    pin = ''; remember('');
+    pin = '';
     typed = ''; renderDots();
     head.hidden = true; form.hidden = true; done.hidden = true; lockBtn.hidden = true;
     pinView.hidden = false;
@@ -755,7 +756,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
     window.scrollTo(0, 0);
   }
 
-  function showApp() {
+  function showApp(me) {
+    if (me && me.name) $('whoName').textContent = me.name;
     pinView.hidden = true;
     lockBtn.hidden = false;
     head.hidden = false; form.hidden = false; done.hidden = true;
@@ -786,25 +788,13 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5S
 
   lockBtn.addEventListener('click', function () {
     clearForm();
-    showLogin('Locked. Enter the owner PIN to continue.');
+    showLogin('Locked. Enter your PIN to continue.');
   });
 
   /* ---------- start ---------- */
   if (!API_READY) {
     setKeypad(false);
     setPinMsg('This page is not connected yet: add the Apps Script link (API_URL) in this file.', true);
-  } else {
-    var savedPin = recall();
-    if (savedPin.length === PIN_LENGTH) {
-      pinBusy = true; setKeypad(false); setPinMsg('Opening…');
-      call('checkOwnerPin', { pin: savedPin })
-        .then(function () { pin = savedPin; showApp(); })
-        .catch(function (err) {
-          if (isPinError(err)) remember('');
-          setPinMsg(isPinError(err) ? 'Enter the owner PIN to continue.' : errText(err), !isPinError(err));
-        })
-        .finally(function () { pinBusy = false; setKeypad(true); });
-    }
   }
 })();
 </script>
