@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#15130F">
+<title>LS — Add staff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#15130F; --surface:#201D18; --surface2:#2A261F; --line:#3A342B;
+  --text:#F4EFE6; --dim:#B5AC9C; --faint:#9C9384;
+  --gold:#F2B33D; --ink:#1F1606; --mint:#6FD3A4; --coral:#FF8F73;
+  --num:'Space Grotesk','Hind Madurai',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{background:#0E0C09}
+body{margin:0;color:var(--text);font-family:'Hind Madurai',system-ui,sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);display:flex;flex-direction:column}
+@media (min-width:640px){
+  .app{margin:32px auto;min-height:auto;border-radius:32px;box-shadow:0 0 0 1px #2A261F,0 30px 80px rgba(0,0,0,.5)}
+  .bar{border-radius:0 0 32px 32px}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.top{padding:28px 20px 4px;display:flex;flex-direction:column;gap:2px}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--dim);margin-bottom:6px}
+.eyebrow i{width:8px;height:8px;border-radius:99px;background:var(--gold)}
+h1{margin:0;font-family:var(--num);font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.15}
+.ta-sub{margin:0;font-size:17px;color:var(--dim)}
+
+form{display:flex;flex-direction:column;flex:1}
+main{padding:20px 20px 28px;display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0;margin:0;padding:0;border:0}
+.label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;width:100%;padding:0;font-size:15px;font-weight:600}
+legend.label{margin-bottom:6px}
+.label-ta{font-size:13px;font-weight:500;color:var(--dim)}
+.opt{font-size:12px;font-weight:600;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+.control{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px;border-radius:14px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow .15s}
+.control:focus-within{box-shadow:inset 0 0 0 2px var(--gold)}
+.control.area{align-items:flex-start}
+.control input,.control textarea{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit;font-size:17px;padding:14px 0}
+.control textarea{resize:none;line-height:1.4;min-height:88px}
+.control input[type="date"]{min-height:54px}
+.control input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.8);cursor:pointer}
+.prefix{align-self:stretch;display:flex;align-items:center;padding-right:12px;border-right:1px solid var(--line);font-family:var(--num);font-size:17px;color:var(--dim)}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+input.num{letter-spacing:.03em}
+input.caps{text-transform:uppercase}
+::placeholder{color:var(--faint);opacity:1;text-transform:none}
+.ok{display:none;flex:none;color:var(--mint)}
+.field.valid .ok{display:block}
+.control.area .ok{margin-top:16px}
+.err{display:none;align-items:flex-start;gap:6px;font-size:14px;font-weight:600;color:var(--coral)}
+.err svg{flex:none;margin-top:2px}
+.field.invalid .control{box-shadow:inset 0 0 0 2px var(--coral)}
+.field.invalid .err{display:flex}
+
+/* choice chips (radio) */
+.choice{display:flex;flex-wrap:wrap;gap:8px}
+.choice label{position:relative;display:flex}
+.choice input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.choice span{display:flex;align-items:center;min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);font-size:15px;font-weight:600;color:var(--text)}
+.choice input:checked + span{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.choice input:focus-visible + span{outline:2px solid var(--gold);outline-offset:2px}
+.field.invalid .choice span{border-color:var(--coral)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.bar{position:sticky;bottom:0;margin-top:auto;padding:12px 20px calc(16px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--surface2)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:60px;border:0;border-radius:16px;background:var(--gold);color:var(--ink);font:inherit;font-size:18px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+
+.done{padding:40px 20px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
+.done-head{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.tick{width:104px;height:104px;border-radius:99px;background:#1C3329;box-shadow:0 0 0 10px rgba(111,211,164,.08);color:var(--mint);display:flex;align-items:center;justify-content:center;animation:pop .5s ease-out both}
+.tick path{stroke-dasharray:24;animation:draw .45s .3s ease-out both}
+.done h2{margin:0;font-family:var(--num);font-size:28px;font-weight:600;outline:none}
+.vcard{background:var(--surface);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px;animation:rise .4s .35s ease-out both}
+.v-name{font-family:var(--num);font-size:22px;font-weight:600;line-height:1.2}
+.v-contact{font-size:15px;color:var(--dim);margin-top:-10px}
+.v-rows{display:flex;flex-direction:column}
+.v-row{display:grid;grid-template-columns:118px minmax(0,1fr);gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--surface2)}
+.v-row .k{font-size:14px;color:var(--dim)}
+.v-row .v{font-size:16px;overflow-wrap:anywhere}
+.v-row a{color:var(--gold);font-weight:600;text-decoration:none}
+.v-row a:hover{text-decoration:underline}
+.muted{color:var(--faint)}
+.actions{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+@keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+/* owner PIN screen */
+.pin{padding:28px 20px 28px;display:flex;flex-direction:column;gap:22px;flex:1}
+.pin .top{padding:0}
+.dots{display:flex;gap:14px;justify-content:center;margin-top:10px}
+.dot{width:16px;height:16px;border-radius:99px;border:2px solid var(--faint);background:transparent}
+.dot.on{background:var(--gold);border-color:var(--gold)}
+.dots.wrong .dot{border-color:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .dots.wrong{animation:shake .35s ease-in-out}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+}
+.pin-msg{margin:0;min-height:1.45em;text-align:center;font-size:15px;color:var(--dim)}
+.pin-msg.bad{color:var(--coral);font-weight:600}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:auto}
+.key{height:64px;border:0;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);color:var(--text);font-family:var(--num);font-size:26px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.key.word{font-family:inherit;font-size:16px}
+.key:active{background:var(--surface2)}
+.key:disabled{opacity:.5;cursor:default}
+.key:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.lockbtn{margin-left:auto;height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.save-err{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--coral)}
+.save-err:empty{display:none}
+.btn:disabled{opacity:.6;cursor:progress}
+.idpill{font-family:var(--num);font-size:15px;font-weight:600;color:var(--gold);border:1px solid var(--line);border-radius:99px;padding:3px 14px;letter-spacing:.04em}
+.note{margin:16px 20px 0;font-size:14px;color:var(--dim);background:var(--surface);border-radius:12px;padding:8px 12px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section class="pin" id="pinView" aria-labelledby="pinTitle">
+  <header class="top">
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Owner</div>
+    <h1 id="pinTitle">Owner PIN</h1>
+    <p class="ta-sub" lang="ta">உரிமையாளர் PIN எண்</p>
+  </header>
+  <div class="dots" id="dots" aria-hidden="true">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <p class="pin-msg" id="pinMsg" role="status" aria-live="polite"></p>
+  <div class="keypad">
+    <button type="button" class="key" data-key="1">1</button>
+    <button type="button" class="key" data-key="2">2</button>
+    <button type="button" class="key" data-key="3">3</button>
+    <button type="button" class="key" data-key="4">4</button>
+    <button type="button" class="key" data-key="5">5</button>
+    <button type="button" class="key" data-key="6">6</button>
+    <button type="button" class="key" data-key="7">7</button>
+    <button type="button" class="key" data-key="8">8</button>
+    <button type="button" class="key" data-key="9">9</button>
+    <button type="button" class="key word" data-key="clear">Clear</button>
+    <button type="button" class="key" data-key="0">0</button>
+    <button type="button" class="key word" data-key="back" aria-label="Delete last digit">⌫</button>
+  </div>
+</section>
+
+<header class="top" id="formHead" hidden>
+  <div class="eyebrow"><i aria-hidden="true"></i>LS · Staff<button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
+  <h1>Add staff</h1>
+  <p class="ta-sub" lang="ta">புதிய பணியாளர்</p>
+</header>
+
+<form id="staffForm" novalidate hidden>
+<main>
+
+  <div class="field" data-field="name">
+    <label class="label" for="name"><span>Staff name</span><span class="label-ta" lang="ta">பெயர்</span></label>
+    <div class="control">
+      <input id="name" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next" aria-describedby="name-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="name-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <fieldset class="field" data-field="role" aria-describedby="role-err">
+    <legend class="label"><span>Role</span><span class="label-ta" lang="ta">பணி</span></legend>
+    <div class="choice">
+      <label><input type="radio" name="role" value="Cook"><span>Cook</span></label>
+      <label><input type="radio" name="role" value="Helper"><span>Helper</span></label>
+      <label><input type="radio" name="role" value="Cleaner"><span>Cleaner</span></label>
+      <label><input type="radio" name="role" value="Cashier"><span>Cashier</span></label>
+      <label><input type="radio" name="role" value="Supervisor"><span>Supervisor</span></label>
+      <label><input type="radio" name="role" value="Delivery"><span>Delivery</span></label>
+      <label><input type="radio" name="role" value="Other"><span>Other</span></label>
+    </div>
+    <div class="err" id="role-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </fieldset>
+
+  <div class="field" data-field="phone">
+    <label class="label" for="phone"><span>Phone number</span><span class="label-ta" lang="ta">போன் எண்</span></label>
+    <div class="control">
+      <span class="prefix" aria-hidden="true">+91</span>
+      <input id="phone" class="num" type="tel" inputmode="numeric" autocomplete="off" enterkeyhint="next" placeholder="98765 43210" aria-describedby="phone-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="phone-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="wa">
+    <label class="label" for="wa"><span>WhatsApp number</span><span class="label-ta" lang="ta">வாட்ஸ்அப் எண்</span></label>
+    <div class="control">
+      <span class="prefix" aria-hidden="true">+91</span>
+      <input id="wa" class="num" type="tel" inputmode="numeric" autocomplete="off" enterkeyhint="next" placeholder="98765 43210" aria-describedby="wa-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="wa-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="address">
+    <label class="label" for="address"><span>Address</span><span class="label-ta" lang="ta">முகவரி</span></label>
+    <div class="control area">
+      <textarea id="address" rows="3" autocomplete="off" aria-describedby="address-err"></textarea>
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="address-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="joined">
+    <label class="label" for="joined"><span>Joining date</span><span class="label-ta" lang="ta">சேர்ந்த தேதி</span></label>
+    <div class="control">
+      <input id="joined" class="num" type="date" enterkeyhint="next" aria-describedby="joined-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="joined-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <fieldset class="field" data-field="stype" aria-describedby="stype-err">
+    <legend class="label"><span>Salary type</span><span class="label-ta" lang="ta">சம்பள வகை</span></legend>
+    <div class="choice">
+      <label><input type="radio" name="stype" value="month"><span>Monthly</span></label>
+      <label><input type="radio" name="stype" value="day"><span>Daily wage</span></label>
+    </div>
+    <div class="err" id="stype-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </fieldset>
+
+  <div class="field" data-field="salary">
+    <label class="label" for="salary"><span id="salaryLabel">Salary</span><span class="label-ta" lang="ta" id="salaryLabelTa">சம்பளம்</span></label>
+    <div class="control">
+      <span class="prefix" aria-hidden="true">₹</span>
+      <input id="salary" class="num" type="text" inputmode="numeric" enterkeyhint="next" aria-describedby="salary-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="salary-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="advance">
+    <label class="label" for="advance"><span>Opening advance</span><span class="label-ta" lang="ta">முன்பணம் நிலுவை</span></label>
+    <div class="control">
+      <span class="prefix" aria-hidden="true">₹</span>
+      <input id="advance" class="num" type="text" inputmode="numeric" enterkeyhint="next" placeholder="0" aria-describedby="advance-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="advance-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+    <div class="chips">
+      <button type="button" class="chip" id="zeroChip" aria-pressed="false">₹0</button>
+    </div>
+  </div>
+
+  <div class="field" data-field="upi">
+    <label class="label" for="upi"><span>UPI phone number<span class="opt">Optional</span></span><span class="label-ta" lang="ta">UPI போன் எண்</span></label>
+    <div class="control">
+      <span class="prefix" aria-hidden="true">+91</span>
+      <input id="upi" class="num" type="tel" inputmode="numeric" autocomplete="off" enterkeyhint="next" placeholder="98765 43210" aria-describedby="upi-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="upi-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="acct">
+    <label class="label" for="acct"><span>Bank account number<span class="opt">Optional</span></span><span class="label-ta" lang="ta">வங்கி கணக்கு எண்</span></label>
+    <div class="control">
+      <input id="acct" class="num" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" aria-describedby="acct-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="acct-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="ifsc">
+    <label class="label" for="ifsc"><span>IFSC code<span class="opt">Optional</span></span><span class="label-ta" lang="ta">IFSC குறியீடு</span></label>
+    <div class="control">
+      <input id="ifsc" class="num caps" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next" maxlength="11" placeholder="SBIN0001234" aria-describedby="ifsc-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="ifsc-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="bank">
+    <label class="label" for="bank"><span>Bank name<span class="opt">Optional</span></span><span class="label-ta" lang="ta">வங்கி பெயர்</span></label>
+    <div class="control">
+      <input id="bank" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next" aria-describedby="bank-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="bank-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="emName">
+    <label class="label" for="emName"><span>Emergency contact name</span><span class="label-ta" lang="ta">அவசர தொடர்பு நபர்</span></label>
+    <div class="control">
+      <input id="emName" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next" aria-describedby="emName-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="emName-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="emPhone">
+    <label class="label" for="emPhone"><span>Emergency contact number</span><span class="label-ta" lang="ta">அவசர தொடர்பு எண்</span></label>
+    <div class="control">
+      <span class="prefix" aria-hidden="true">+91</span>
+      <input id="emPhone" class="num" type="tel" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="98765 43210" aria-describedby="emPhone-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="emPhone-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+</main>
+
+<div class="bar">
+  <p class="save-err" id="saveErr" role="alert"></p>
+  <button type="submit" class="btn" id="saveBtn">
+    <span id="saveLabel">Save staff</span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+  </button>
+</div>
+</form>
+
+<section class="done" id="done" hidden aria-labelledby="doneTitle">
+  <div class="done-head">
+    <div class="tick" aria-hidden="true">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <h2 id="doneTitle" tabindex="-1">Staff added</h2>
+    <p class="ta-sub" lang="ta" id="doneTa">சேர்க்கப்பட்டது</p>
+    <span class="idpill" id="vId"></span>
+  </div>
+
+  <article class="vcard" aria-label="Staff details">
+    <div class="v-name" id="vName"></div>
+    <div class="v-contact" id="vRole"></div>
+    <div class="v-rows">
+      <div class="v-row"><span class="k">Phone</span><span class="v num"><a id="vPhone" href="#"></a></span></div>
+      <div class="v-row"><span class="k">WhatsApp</span><span class="v num"><a id="vWa" href="#" target="_blank" rel="noopener"></a></span></div>
+      <div class="v-row"><span class="k">Address</span><span class="v" id="vAddr" style="white-space:pre-line"></span></div>
+      <div class="v-row"><span class="k">Joined</span><span class="v num" id="vJoined"></span></div>
+      <div class="v-row"><span class="k">Salary</span><span class="v num" id="vSalary"></span></div>
+      <div class="v-row"><span class="k">Opening advance</span><span class="v num" id="vAdvance"></span></div>
+      <div class="v-row"><span class="k">UPI phone</span><span class="v num" id="vUpi"></span></div>
+      <div class="v-row"><span class="k">Account no.</span><span class="v num" id="vAcct"></span></div>
+      <div class="v-row"><span class="k">IFSC</span><span class="v num" id="vIfsc"></span></div>
+      <div class="v-row"><span class="k">Bank</span><span class="v" id="vBank"></span></div>
+      <div class="v-row"><span class="k">Emergency</span><span class="v" id="vEm"></span></div>
+    </div>
+  </article>
+
+  <div class="actions">
+    <button type="button" class="btn" id="anotherBtn">Add another staff</button>
+    <button type="button" class="btn ghost" id="editBtn">Edit</button>
+  </div>
+</section>
+
+<p class="sr" id="live" aria-live="polite"></p>
+</div>
+
+<script>
+/* ===== SETUP: paste your Apps Script web app link (ends in /exec) between the quotes ===== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzy55ZTn-_ZhBcxelX9lB5SxQqupaLUyVyvsZYPyTVnkKL1XltJ6jJl4YU_mcuin7UqDw/exec';
+/* ========================================================================================= */
+</script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('staffForm');
+  var head = $('formHead');
+  var done = $('done');
+  var allKeys = ['name', 'role', 'phone', 'wa', 'address', 'joined', 'stype', 'salary', 'advance', 'upi', 'acct', 'ifsc', 'bank', 'emName', 'emPhone'];
+  var inputKeys = ['name', 'phone', 'wa', 'joined', 'salary', 'advance', 'upi', 'acct', 'ifsc', 'bank', 'emName', 'emPhone'];
+  var f = {};
+  ['name', 'phone', 'wa', 'address', 'joined', 'salary', 'advance', 'upi', 'acct', 'ifsc', 'bank', 'emName', 'emPhone'].forEach(function (k) { f[k] = $(k); });
+  var zeroChip = $('zeroChip');
+  var touched = {};
+  var bankEdited = false;
+
+  var BANKS = {
+    SBIN: 'State Bank of India', HDFC: 'HDFC Bank', ICIC: 'ICICI Bank', UTIB: 'Axis Bank',
+    KKBK: 'Kotak Mahindra Bank', IDIB: 'Indian Bank', IOBA: 'Indian Overseas Bank',
+    CNRB: 'Canara Bank', BARB: 'Bank of Baroda', PUNB: 'Punjab National Bank',
+    UBIN: 'Union Bank of India', BKID: 'Bank of India', CBIN: 'Central Bank of India',
+    UCBA: 'UCO Bank', MAHB: 'Bank of Maharashtra', PSIB: 'Punjab & Sind Bank',
+    IBKL: 'IDBI Bank', YESB: 'Yes Bank', INDB: 'IndusInd Bank', IDFB: 'IDFC First Bank',
+    FDRL: 'Federal Bank', SIBL: 'South Indian Bank', KVBL: 'Karur Vysya Bank',
+    CIUB: 'City Union Bank', TMBL: 'Tamilnad Mercantile Bank', KARB: 'Karnataka Bank',
+    RATN: 'RBL Bank', DLXB: 'Dhanlaxmi Bank', ESFB: 'Equitas Small Finance Bank',
+    AUBL: 'AU Small Finance Bank', DBSS: 'DBS Bank India'
+  };
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  var now = new Date();
+  var todayStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+  f.joined.max = todayStr;
+  f.joined.value = todayStr;
+
+  function digits(s) { return String(s || '').replace(/\D/g, ''); }
+  function fmtPhone(d) { d = d.slice(0, 10); return d.length > 5 ? d.slice(0, 5) + ' ' + d.slice(5) : d; }
+  function fmtAcct(d) { return d.replace(/(\d{4})(?=\d)/g, '$1 '); }
+  function fmtINR(d) { d = d.replace(/^0+(?=\d)/, ''); return d === '' ? '' : Number(d).toLocaleString('en-IN'); }
+  function cleanIfsc(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11); }
+  function radio(n) { var r = form.querySelector('input[name="' + n + '"]:checked'); return r ? r.value : ''; }
+  function mobileMsg(d) {
+    if (!d) return 'Type the number';
+    if (d.length < 10) return '10 digits needed, you have typed ' + d.length;
+    if (!/^[6-9]/.test(d)) return 'Mobile numbers start with 6, 7, 8 or 9';
+    return '';
+  }
+  function hasBank() { return digits(f.acct.value) !== '' || cleanIfsc(f.ifsc.value) !== ''; }
+
+  var rules = {
+    name: function () { return f.name.value.trim().length >= 2 ? '' : 'Type the staff name'; },
+    role: function () { return radio('role') ? '' : 'Pick a role'; },
+    phone: function () { return mobileMsg(digits(f.phone.value)); },
+    wa: function () { return mobileMsg(digits(f.wa.value)); },
+    address: function () { return f.address.value.trim().length >= 6 ? '' : 'Type the address'; },
+    joined: function () {
+      var v = f.joined.value;
+      if (!v) return 'Pick the joining date';
+      return v > todayStr ? 'Joining date cannot be in the future' : '';
+    },
+    stype: function () { return radio('stype') ? '' : 'Pick Monthly or Daily wage'; },
+    salary: function () { return Number(digits(f.salary.value) || 0) > 0 ? '' : 'Type the salary amount'; },
+    advance: function () { return f.advance.value.trim() === '' ? 'Type the amount' : ''; },
+    upi: function () { var d = digits(f.upi.value); return d ? mobileMsg(d) : ''; },
+    acct: function () {
+      var d = digits(f.acct.value);
+      if (!d) return hasBank() ? 'Type the account number' : '';
+      return d.length >= 9 && d.length <= 18 ? '' : 'Account numbers have 9 to 18 digits, you have typed ' + d.length;
+    },
+    ifsc: function () {
+      var v = cleanIfsc(f.ifsc.value);
+      if (!v) return hasBank() ? 'Type the IFSC code' : '';
+      if (v.length < 11) return 'IFSC has 11 characters, you have typed ' + v.length;
+      return /^[A-Z]{4}0[A-Z0-9]{6}$/.test(v) ? '' : 'IFSC looks like SBIN0001234 (5th character is 0)';
+    },
+    bank: function () {
+      if (f.bank.value.trim().length >= 2) return '';
+      return hasBank() ? 'Type the bank name' : '';
+    },
+    emName: function () { return f.emName.value.trim().length >= 2 ? '' : 'Type the emergency contact name'; },
+    emPhone: function () { return mobileMsg(digits(f.emPhone.value)); }
+  };
+
+  function fieldEl(k) { return form.querySelector('[data-field="' + k + '"]'); }
+  function hasValue(k) {
+    if (k === 'role' || k === 'stype') return radio(k) !== '';
+    return f[k].value.trim() !== '';
+  }
+
+  function check(k, showError) {
+    var msg = rules[k]();
+    var el = fieldEl(k);
+    var input = f[k];
+    if (showError) {
+      el.classList.toggle('invalid', !!msg);
+      if (input) input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      el.querySelector('.err span').textContent = msg;
+    } else if (!msg) {
+      el.classList.remove('invalid');
+      if (input) input.setAttribute('aria-invalid', 'false');
+    }
+    el.classList.toggle('valid', !msg && hasValue(k));
+    return msg;
+  }
+  function refresh(k) { check(k, !!touched[k]); }
+  function refreshBank() { ['acct', 'ifsc', 'bank'].forEach(refresh); }
+
+  ['phone', 'wa', 'upi', 'emPhone'].forEach(function (k) {
+    var input = f[k];
+    input.addEventListener('input', function () {
+      var d = digits(input.value);
+      if (d.length > 10 && d.indexOf('91') === 0) d = d.slice(2);
+      if (d.length > 10 && d.charAt(0) === '0') d = d.slice(1);
+      input.value = fmtPhone(d);
+    });
+  });
+
+  f.salary.addEventListener('input', function () { f.salary.value = fmtINR(digits(f.salary.value).slice(0, 8)); });
+
+  f.advance.addEventListener('input', function () {
+    f.advance.value = fmtINR(digits(f.advance.value).slice(0, 8));
+    zeroChip.setAttribute('aria-pressed', f.advance.value === '0' ? 'true' : 'false');
+  });
+
+  zeroChip.addEventListener('click', function () {
+    f.advance.value = '0';
+    zeroChip.setAttribute('aria-pressed', 'true');
+    touched.advance = true;
+    refresh('advance');
+  });
+
+  f.acct.addEventListener('input', function () { f.acct.value = fmtAcct(digits(f.acct.value).slice(0, 18)); });
+
+  f.ifsc.addEventListener('input', function () {
+    var v = cleanIfsc(f.ifsc.value);
+    f.ifsc.value = v;
+    var name = BANKS[v.slice(0, 4)];
+    if (name && (!bankEdited || f.bank.value.trim() === '')) {
+      f.bank.value = name;
+      bankEdited = false;
+    }
+  });
+  f.bank.addEventListener('input', function () { bankEdited = true; });
+
+  function setSalaryLabel() {
+    var t = radio('stype');
+    $('salaryLabel').textContent = t === 'day' ? 'Daily wage' : (t === 'month' ? 'Monthly salary' : 'Salary');
+    $('salaryLabelTa').textContent = t === 'day' ? 'தினக் கூலி' : (t === 'month' ? 'மாத சம்பளம்' : 'சம்பளம்');
+  }
+
+  form.querySelectorAll('input[name="role"]').forEach(function (r) {
+    r.addEventListener('change', function () { touched.role = true; refresh('role'); });
+  });
+  form.querySelectorAll('input[name="stype"]').forEach(function (r) {
+    r.addEventListener('change', function () { touched.stype = true; refresh('stype'); setSalaryLabel(); });
+  });
+
+  Object.keys(f).forEach(function (k) {
+    var ev = k === 'joined' ? 'change' : 'input';
+    f[k].addEventListener(ev, function () {
+      if (k === 'acct' || k === 'ifsc' || k === 'bank') { refreshBank(); } else { refresh(k); }
+    });
+    f[k].addEventListener('blur', function () {
+      if (f[k].value.trim() !== '') touched[k] = true;
+      if (k === 'acct' || k === 'ifsc' || k === 'bank') { refreshBank(); } else { refresh(k); }
+    });
+  });
+
+  form.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
+    var idx = inputKeys.indexOf(e.target.id);
+    if (idx === -1) return;
+    e.preventDefault();
+    if (idx + 1 < inputKeys.length) { f[inputKeys[idx + 1]].focus(); return; }
+    if (form.requestSubmit) { form.requestSubmit(); } else { $('saveBtn').click(); }
+  });
+
+  function announce(t) { $('live').textContent = ''; setTimeout(function () { $('live').textContent = t; }, 30); }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var first = null;
+    allKeys.forEach(function (k) {
+      touched[k] = true;
+      var m = check(k, true);
+      if (m && !first) first = k;
+    });
+    if (first) {
+      var el = fieldEl(first);
+      try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (err) { el.scrollIntoView(); }
+      var target = f[first] || el.querySelector('input');
+      try { target.focus({ preventScroll: true }); } catch (err) { target.focus(); }
+      announce('Please fix the highlighted field');
+      return;
+    }
+    save();
+  });
+
+  function dash(el, text) {
+    el.textContent = text || '—';
+    el.classList.toggle('muted', !text);
+  }
+
+  function showDone(res) {
+    var updated = !!(res && res.updated);
+    $('doneTitle').textContent = updated ? 'Staff updated' : 'Staff added';
+    $('doneTa').textContent = updated ? 'மாற்றப்பட்டது' : 'சேர்க்கப்பட்டது';
+    $('vId').textContent = (res && res.id) || '';
+    var ph = digits(f.phone.value);
+    var wa = digits(f.wa.value);
+    var upi = digits(f.upi.value);
+    var acct = digits(f.acct.value);
+    var t = radio('stype');
+    var sal = Number(digits(f.salary.value) || 0).toLocaleString('en-IN');
+    var adv = Number(digits(f.advance.value) || 0).toLocaleString('en-IN');
+    var joined = f.joined.value;
+    var joinedText = joined;
+    try {
+      joinedText = new Date(joined + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch (err) {}
+
+    $('vName').textContent = f.name.value.trim();
+    $('vRole').textContent = radio('role');
+    $('vPhone').textContent = '+91 ' + fmtPhone(ph);
+    $('vPhone').href = 'tel:+91' + ph;
+    $('vWa').textContent = '+91 ' + fmtPhone(wa);
+    $('vWa').href = 'https://wa.me/91' + wa;
+    $('vAddr').textContent = f.address.value.trim();
+    $('vJoined').textContent = joinedText;
+    $('vSalary').textContent = '₹' + sal + (t === 'day' ? ' / day' : ' / month');
+    $('vAdvance').textContent = '₹' + adv;
+    dash($('vUpi'), upi ? '+91 ' + fmtPhone(upi) : '');
+    dash($('vAcct'), acct ? fmtAcct(acct) : '');
+    dash($('vIfsc'), cleanIfsc(f.ifsc.value));
+    dash($('vBank'), f.bank.value.trim());
+    $('vEm').textContent = f.emName.value.trim() + ' · +91 ' + fmtPhone(digits(f.emPhone.value));
+
+    form.hidden = true;
+    head.hidden = true;
+    done.hidden = false;
+    window.scrollTo(0, 0);
+    $('doneTitle').focus();
+  }
+
+  function showForm() {
+    setLabel();
+    done.hidden = true;
+    head.hidden = false;
+    form.hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  $('editBtn').addEventListener('click', function () { showForm(); f.name.focus(); });
+
+  // Empties the form for a new staff member.
+  function clearForm() {
+    form.reset();
+    touched = {};
+    bankEdited = false;
+    savedId = '';
+    $('saveErr').textContent = '';
+    f.joined.value = todayStr;
+    zeroChip.setAttribute('aria-pressed', 'false');
+    setSalaryLabel();
+    allKeys.forEach(function (k) {
+      fieldEl(k).classList.remove('invalid', 'valid');
+      if (f[k]) f[k].removeAttribute('aria-invalid');
+    });
+    refresh('joined');
+  }
+
+  $('anotherBtn').addEventListener('click', function () {
+    clearForm();
+    showForm();
+    f.name.focus();
+  });
+
+  refresh('joined');
+
+  var SAVE_ACTION = 'saveStaff', SAVE_LABEL = 'Save staff';
+  function payload() {
+    return { staff: {
+      id: savedId,
+      name: f.name.value.trim(),
+      role: radio('role'),
+      phone: digits(f.phone.value),
+      wa: digits(f.wa.value),
+      address: f.address.value.trim(),
+      joined: f.joined.value,
+      salaryType: radio('stype'),
+      salary: digits(f.salary.value),
+      advance: digits(f.advance.value),
+      upi: digits(f.upi.value),
+      acct: digits(f.acct.value),
+      ifsc: cleanIfsc(f.ifsc.value),
+      bank: f.bank.value.trim(),
+      emName: f.emName.value.trim(),
+      emPhone: digits(f.emPhone.value)
+    } };
+  }
+
+  /* ---------- Owner PIN and saving to the sheet ---------- */
+  var MOCK = window.__LS_MOCK__ || null;   // preview only
+  var API_READY = !!MOCK || /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(API_URL);
+  var PIN_KEY = 'ls-owner-pin', PIN_LENGTH = 6;
+  var pin = '', typed = '', pinBusy = false, savedId = '', saving = false;
+  var pinView = $('pinView'), lockBtn = $('lockBtn');
+  if (window.__LS_PREVIEW__) $('modeNote').hidden = false;
+
+  function remember(v) { try { if (v) { localStorage.setItem(PIN_KEY, v); } else { localStorage.removeItem(PIN_KEY); } } catch (e) {} }
+  function recall() { try { return localStorage.getItem(PIN_KEY) || ''; } catch (e) { return ''; } }
+
+  // Sends a request to the Apps Script (Code.gs) and returns its data.
+  // No Google sign-in is sent (credentials: 'omit'), so several logged-in Google accounts don't matter.
+  async function call(action, payload) {
+    var body = Object.assign({ action: action }, payload || {});
+    if (MOCK) return MOCK(body);
+    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link (API_URL) in this file.');
+    var res;
+    try {
+      var r = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body),
+        credentials: 'omit',
+        redirect: 'follow'
+      });
+      res = await r.json();
+    } catch (e) {
+      throw new Error('Could not reach the sheet. Check the internet and try again.');
+    }
+    if (!res || res.ok !== true) throw new Error((res && res.error) || 'Something went wrong. Try again.');
+    return res.data;
+  }
+  function errText(err) {
+    var m = (err && err.message) ? err.message : String(err || '');
+    return m.replace(/^(Exception|Error):\s*/i, '') || 'Something went wrong. Try again.';
+  }
+  function isPinError(err) { return /PIN/.test(errText(err)); }
+
+  function setPinMsg(t, bad) { var el = $('pinMsg'); el.textContent = t; el.classList.toggle('bad', !!bad); }
+  function renderDots() { pinView.querySelectorAll('.dot').forEach(function (d, i) { d.classList.toggle('on', i < typed.length); }); }
+  function setKeypad(on) { pinView.querySelectorAll('.key').forEach(function (k) { k.disabled = !on; }); }
+  function wrongShake() { var d = $('dots'); d.classList.remove('wrong'); void d.offsetWidth; d.classList.add('wrong'); }
+
+  function pressKey(k) {
+    if (pinBusy) return;
+    if (k === 'back') typed = typed.slice(0, -1);
+    else if (k === 'clear') typed = '';
+    else if (typed.length < PIN_LENGTH) typed += k;
+    $('dots').classList.remove('wrong');
+    setPinMsg('');
+    renderDots();
+    if (typed.length === PIN_LENGTH) tryPin(typed);
+  }
+
+  async function tryPin(p) {
+    pinBusy = true; setKeypad(false); setPinMsg('Checking…');
+    try {
+      await call('checkOwnerPin', { pin: p });
+      pin = p; remember(p);
+      typed = ''; renderDots(); setPinMsg('');
+      showApp();
+    } catch (err) {
+      typed = ''; renderDots(); wrongShake();
+      setPinMsg(errText(err), true);
+    } finally {
+      pinBusy = false; setKeypad(true);
+    }
+  }
+
+  pinView.querySelectorAll('.key').forEach(function (b) { b.addEventListener('click', function () { pressKey(b.dataset.key); }); });
+  document.addEventListener('keydown', function (e) {
+    if (pinView.hidden) return;
+    if (/^[0-9]$/.test(e.key)) pressKey(e.key);
+    else if (e.key === 'Backspace') pressKey('back');
+    else if (e.key === 'Escape') pressKey('clear');
+  });
+
+  // Back to the PIN screen. What was typed in the form is kept unless the form was cleared first.
+  function showLogin(message, bad) {
+    pin = ''; remember('');
+    typed = ''; renderDots();
+    head.hidden = true; form.hidden = true; done.hidden = true; lockBtn.hidden = true;
+    pinView.hidden = false;
+    setPinMsg(message || '', bad);
+    window.scrollTo(0, 0);
+  }
+
+  function showApp() {
+    pinView.hidden = true;
+    lockBtn.hidden = false;
+    head.hidden = false; form.hidden = false; done.hidden = true;
+    setLabel();
+    window.scrollTo(0, 0);
+  }
+
+  function setLabel() {
+    $('saveLabel').textContent = saving ? 'Saving…' : (savedId ? 'Save changes' : SAVE_LABEL);
+  }
+
+  // First save creates a new record; after Edit, saving again updates the same record (same ID).
+  async function save() {
+    if (saving) return;
+    $('saveErr').textContent = '';
+    saving = true; $('saveBtn').disabled = true; setLabel();
+    try {
+      var res = await call(SAVE_ACTION, Object.assign({ pin: pin }, payload()));
+      savedId = res.id;
+      showDone(res);
+    } catch (err) {
+      if (isPinError(err)) { showLogin(errText(err), true); return; }
+      $('saveErr').textContent = errText(err);
+    } finally {
+      saving = false; $('saveBtn').disabled = false; setLabel();
+    }
+  }
+
+  lockBtn.addEventListener('click', function () {
+    clearForm();
+    showLogin('Locked. Enter the owner PIN to continue.');
+  });
+
+  /* ---------- start ---------- */
+  if (!API_READY) {
+    setKeypad(false);
+    setPinMsg('This page is not connected yet: add the Apps Script link (API_URL) in this file.', true);
+  } else {
+    var savedPin = recall();
+    if (savedPin.length === PIN_LENGTH) {
+      pinBusy = true; setKeypad(false); setPinMsg('Opening…');
+      call('checkOwnerPin', { pin: savedPin })
+        .then(function () { pin = savedPin; showApp(); })
+        .catch(function (err) {
+          if (isPinError(err)) remember('');
+          setPinMsg(isPinError(err) ? 'Enter the owner PIN to continue.' : errText(err), !isPinError(err));
+        })
+        .finally(function () { pinBusy = false; setKeypad(true); });
+    }
+  }
+})();
+</script>
+</body>
+</html>
