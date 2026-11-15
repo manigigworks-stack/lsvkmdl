@@ -113,6 +113,8 @@ input.caps{text-transform:uppercase}
 .key:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .who{margin-left:auto;color:var(--text);font-weight:600}
 .who + .lockbtn{margin-left:10px}
+.lockbtn + .lockbtn{margin-left:0}
+a.lockbtn{display:inline-flex;align-items:center;text-decoration:none}
 .lockbtn{margin-left:auto;height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .save-err{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--coral)}
@@ -125,9 +127,11 @@ input.caps{text-transform:uppercase}
 <body>
 <div class="app">
 
+<p class="note" id="modeNote" hidden>Preview</p>
+
 <section class="pin" id="pinView" aria-labelledby="pinTitle">
   <header class="top">
-    <div class="eyebrow"><i aria-hidden="true"></i>LS · Vendors</div>
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Vendors<a class="lockbtn homelink" href="index.html">Home</a></div>
     <h1 id="pinTitle">Enter your PIN</h1>
     <p class="ta-sub" lang="ta">உங்கள் PIN எண்</p>
   </header>
@@ -152,7 +156,7 @@ input.caps{text-transform:uppercase}
 </section>
 
 <header class="top" id="formHead" hidden>
-  <div class="eyebrow"><i aria-hidden="true"></i>LS · Vendors<span class="who" id="whoName"></span><button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
+  <div class="eyebrow"><i aria-hidden="true"></i>LS · Vendors<span class="who" id="whoName"></span><a class="lockbtn homelink" href="index.html">Home</a><button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
   <h1>New vendor</h1>
   <p class="ta-sub" lang="ta">புதிய விற்பனையாளர்</p>
 </header>
@@ -582,12 +586,39 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
   // The PIN is asked every time the page opens and is never stored on the phone.
   try { localStorage.removeItem(OLD_PIN_KEY); } catch (e) {}   // clears a PIN saved by the older version
 
+  /* ---------- login from the home screen ---------- */
+  // The home screen (index.html) keeps the PIN for this browser tab only, so this page opens without asking again.
+  // It is cleared by Lock, by closing the tab, or after 12 hours.
+  var SESSION_KEY = 'ls-session', SESSION_HOURS = 12;
+  function readSession() {
+    try {
+      var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.pin && s.until > Date.now()) return s;
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+    return null;
+  }
+  function writeSession(p, who) {
+    try {
+      var old = readSession(), same = old && old.pin === p;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        pin: p, name: who.name, role: who.role,
+        pages: same ? (old.pages || []) : [],
+        until: same ? old.until : Date.now() + SESSION_HOURS * 3600 * 1000
+      }));
+    } catch (e) {}
+  }
+  function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {} }
+  // On the website Lock goes back to the home screen. The preview has no home screen next to it, so it stays here.
+  function goHome() { if (MOCK) return false; window.location.href = 'index.html'; return true; }
+  if (window.__LS_HOME__) document.querySelectorAll('.homelink').forEach(function (a) { a.href = window.__LS_HOME__; a.target = '_blank'; a.rel = 'noopener'; });
+
   // Sends a request to the Apps Script (Code.gs) and returns its data.
   // No Google sign-in is sent (credentials: 'omit'), so several logged-in Google accounts don't matter.
   async function call(action, payload) {
     var body = Object.assign({ action: action }, payload || {});
     if (MOCK) return MOCK(body);
-    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link (API_URL) in this file.');
+    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link in config.js.');
     var res;
     try {
       var r = await fetch(API_URL, {
@@ -626,15 +657,18 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
     if (typed.length === PIN_LENGTH) tryPin(typed);
   }
 
-  async function tryPin(p) {
-    pinBusy = true; setKeypad(false); setPinMsg('Checking…');
+  async function tryPin(p, quiet) {
+    pinBusy = true; setKeypad(false); setPinMsg(quiet ? 'Opening…' : 'Checking…');
     try {
       var me = await call('login', { pin: p, page: 'vendors' });
       pin = p;
+      writeSession(p, me);
       typed = ''; renderDots(); setPinMsg('');
       showApp(me);
     } catch (err) {
-      typed = ''; renderDots(); wrongShake();
+      typed = ''; renderDots();
+      if (!quiet) wrongShake();
+      if (/Wrong PIN/.test(errText(err))) clearSession();
       setPinMsg(errText(err), true);
     } finally {
       pinBusy = false; setKeypad(true);
@@ -682,7 +716,7 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
       savedId = res.id;
       showDone(res);
     } catch (err) {
-      if (isPinError(err)) { showLogin(errText(err), true); return; }
+      if (isPinError(err)) { if (/Wrong PIN/.test(errText(err))) clearSession(); showLogin(errText(err), true); return; }
       $('saveErr').textContent = errText(err);
     } finally {
       saving = false; $('saveBtn').disabled = false; setLabel();
@@ -691,13 +725,18 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
 
   lockBtn.addEventListener('click', function () {
     clearForm();
+    clearSession();
+    if (goHome()) return;
     showLogin('Locked. Enter your PIN to continue.');
   });
 
   /* ---------- start ---------- */
   if (!API_READY) {
     setKeypad(false);
-    setPinMsg('This page is not connected yet: add the Apps Script link (API_URL) in this file.', true);
+    setPinMsg('This page is not connected yet: add the Apps Script link in config.js.', true);
+  } else {
+    var s = readSession();
+    if (s) tryPin(s.pin, true);
   }
 })();
 </script>

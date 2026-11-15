@@ -6,53 +6,51 @@
 <title>Coconut Daily Log</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Hind+Madurai:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#15130F">
 <style>
 :root{
-  /* Layout: one narrow column, one field per block, big thumb-sized controls for a kitchen phone */
-  --bg:#EDF1EA;
-  --surface:#FFFFFF;
-  --ink:#1C2620;
-  --muted:#5A675E;
-  --palm:#2E6A3E;
-  --shell:#7A4A28;
-  --line:#D3DCD1;
-  --soft:#E2EAE0;
-  --on-palm:#FFFFFF;
-  --bad:#B3261E;
-  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  /* LS theme: same dark palette and fonts as the vendor, staff, bill, payment, salary and sales screens */
+  --bg:#15130F;
+  --surface:#201D18;
+  --ink:#F4EFE6;
+  --muted:#B5AC9C;
+  --palm:#F2B33D;
+  --shell:#FFD27A;
+  --line:#3A342B;
+  --soft:#2A261F;
+  --on-palm:#1F1606;
+  --bad:#FF8F73;
+  --ok:#6FD3A4;
+  --font-display:"Space Grotesk","Hind Madurai",system-ui,sans-serif;
   --font-body:"Hind Madurai","Noto Sans Tamil","Latha","Segoe UI",system-ui,sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#101611;--surface:#19211B;--ink:#E6ECE5;--muted:#9AA79C;--palm:#79C48B;--shell:#D49C6B;
-    --line:#2B362E;--soft:#212C24;--on-palm:#0E1A11;--bad:#FF8A80;color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#101611;--surface:#19211B;--ink:#E6ECE5;--muted:#9AA79C;--palm:#79C48B;--shell:#D49C6B;
-  --line:#2B362E;--soft:#212C24;--on-palm:#0E1A11;--bad:#FF8A80;color-scheme:dark;
+  color-scheme:dark;
 }
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
-.app{max-width:440px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:14px}
+html{background:#0E0C09}
+body{margin:0;background:#0E0C09;color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);padding:28px 20px 40px;display:flex;flex-direction:column;gap:14px}
+@media (min-width:640px){.app{margin:32px auto;min-height:auto;border-radius:32px;box-shadow:0 0 0 1px #2A261F,0 30px 80px rgba(0,0,0,.5)}}
 
-header{display:flex;align-items:center;gap:14px}
+header{display:flex;align-items:flex-start;gap:14px}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.eyebrow i{width:8px;height:8px;border-radius:99px;background:var(--palm)}
 .title{display:flex;flex-direction:column;gap:2px;min-width:0}
-.logo{flex:none;width:56px;height:56px;border-radius:16px;background:var(--palm);color:var(--on-palm);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:24px;letter-spacing:0.02em;line-height:1}
-h1{font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-0.01em}
+h1{font-family:var(--font-display);font-weight:600;font-size:30px;line-height:1.15;margin:0;text-wrap:balance;letter-spacing:-0.01em}
 .ta{color:var(--muted);font-size:15px}
-.lock{margin-left:auto;flex:none;height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.title > .ta{font-size:17px}
+a.lock{display:inline-flex;align-items:center;text-decoration:none}
+.lock + .lock{margin-left:-6px}
+.lock{margin-left:auto;flex:none;height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
 
 .who{margin:-4px 0 0;font-size:15px;color:var(--muted)}
 .who b{color:var(--ink);font-weight:600}
 .note{font-size:14px;color:var(--muted);background:var(--soft);border-radius:10px;padding:8px 12px;margin:0}
 
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:22px}
+.card{background:var(--surface);border:0;border-radius:22px;padding:18px 16px;display:flex;flex-direction:column;gap:22px}
 
 /* PIN screen */
 .pin-head{display:flex;flex-direction:column;gap:2px;text-align:center}
@@ -69,7 +67,7 @@ h1{font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1.
 .pin-msg{margin:0;min-height:1.45em;text-align:center;font-size:15px;color:var(--muted)}
 .pin-msg.bad{color:var(--bad);font-weight:500}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.key{height:64px;border-radius:14px;border:1.5px solid var(--line);background:var(--soft);color:var(--ink);font-family:var(--font-display);font-size:28px;font-weight:600;cursor:pointer;touch-action:manipulation;font-variant-numeric:tabular-nums}
+.key{height:64px;border-radius:16px;border:0;box-shadow:inset 0 0 0 1.5px var(--line);background:var(--soft);color:var(--ink);font-family:var(--font-display);font-size:28px;font-weight:600;cursor:pointer;touch-action:manipulation;font-variant-numeric:tabular-nums}
 .key.word{font-family:var(--font-body);font-size:16px}
 .key:active{transform:scale(0.97)}
 .key:disabled{opacity:.5;cursor:default}
@@ -84,7 +82,10 @@ h1{font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1.
 .chip{font-size:13px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--palm);white-space:nowrap}
 .chip.past{color:var(--shell)}
 
-input{font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:12px;width:100%}
+input{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:14px;width:100%}
+input:focus{border-color:var(--palm)}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.8);cursor:pointer}
+::placeholder{color:#9C9384;opacity:1}
 input:focus-visible,button:focus-visible{outline:3px solid var(--palm);outline-offset:2px}
 input[type="date"]{height:52px;padding:0 14px;font-size:18px}
 
@@ -96,7 +97,7 @@ input[type="date"]{height:52px;padding:0 14px;font-size:18px}
 .big::-webkit-outer-spin-button,.big::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
 .stepper{display:grid;grid-template-columns:68px 1fr 68px;gap:10px}
-.step{height:68px;border-radius:12px;border:1.5px solid var(--line);background:var(--soft);color:var(--ink);font-size:32px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.step{height:68px;border-radius:14px;border:0;box-shadow:inset 0 0 0 1.5px var(--line);background:var(--soft);color:var(--ink);font-size:32px;font-weight:600;cursor:pointer;touch-action:manipulation}
 .step:active{transform:scale(0.97)}
 
 .unit-input{position:relative}
@@ -108,16 +109,16 @@ input[type="date"]{height:52px;padding:0 14px;font-size:18px}
 .err:empty{display:none}
 input.invalid{border-color:var(--bad)}
 
-.save{height:58px;border:0;border-radius:14px;background:var(--palm);color:var(--on-palm);font:inherit;font-weight:600;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:manipulation}
+.save{height:60px;border:0;border-radius:16px;background:var(--palm);color:var(--on-palm);font:inherit;font-weight:700;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:manipulation}
 .save .ta{color:inherit;opacity:.85;font-size:16px}
 .save:disabled{opacity:.6;cursor:progress}
 
-.saved h2{font-family:var(--font-display);font-size:22px;margin:0;color:var(--palm)}
-.rows{display:flex;flex-direction:column;border-top:1px solid var(--line)}
-.row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.saved h2{font-family:var(--font-display);font-size:26px;font-weight:600;margin:0;color:var(--ok)}
+.rows{display:flex;flex-direction:column;border-top:1px solid var(--soft)}
+.row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--soft)}
 .row .k{color:var(--muted)}
 .row .v{font-family:var(--font-display);font-weight:600;font-size:20px;font-variant-numeric:tabular-nums}
-.ghost{height:52px;border-radius:14px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:600;font-size:17px;cursor:pointer}
+.ghost{height:56px;border-radius:16px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:600;font-size:17px;cursor:pointer}
 
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}.step:active,.key:active{transform:none}}
 </style>
@@ -125,17 +126,18 @@ input.invalid{border-color:var(--bad)}
 <body>
 <main class="app">
   <header>
-    <div class="logo" role="img" aria-label="LS logo">LS</div>
     <div class="title">
+      <div class="eyebrow"><i aria-hidden="true"></i>LS · Coconut</div>
       <h1>Coconut Daily Log</h1>
       <span class="ta">தேங்காய் தினசரி கணக்கு</span>
     </div>
+    <a class="lock homelink" href="index.html">Home</a>
     <button type="button" class="lock" id="lock-btn" hidden>Lock</button>
   </header>
 
   <p class="who" id="who-bar" hidden>Saving as <b id="who-name"></b></p>
 
-  <p class="note" id="mode-note" hidden>Preview: entries stay on this page and are not sent to Google Sheets.</p>
+  <p class="note" id="mode-note" hidden>Preview</p>
 
   <!-- PIN screen -->
   <section class="card" id="login-view" aria-labelledby="pin-title">
@@ -246,6 +248,33 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
   if (window.__COCONUT_PREVIEW__) $('mode-note').hidden = false;
 
   const PIN_KEY = 'ls-coconut-pin';
+
+  /* ---------- login from the home screen ---------- */
+  // The home screen (index.html) keeps the PIN for this browser tab only, so this page opens without asking again.
+  // It is cleared by Lock, by closing the tab, or after 12 hours.
+  var SESSION_KEY = 'ls-session', SESSION_HOURS = 12;
+  function readSession() {
+    try {
+      var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.pin && s.until > Date.now()) return s;
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+    return null;
+  }
+  function writeSession(p, who) {
+    try {
+      var old = readSession(), same = old && old.pin === p;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        pin: p, name: who.name, role: who.role,
+        pages: same ? (old.pages || []) : [],
+        until: same ? old.until : Date.now() + SESSION_HOURS * 3600 * 1000
+      }));
+    } catch (e) {}
+  }
+  function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {} }
+  // On the website Lock goes back to the home screen. The preview has no home screen next to it, so it stays here.
+  function goHome() { if (MOCK) return false; window.location.href = 'index.html'; return true; }
+  if (window.__LS_HOME__) document.querySelectorAll('.homelink').forEach(function (a) { a.href = window.__LS_HOME__; a.target = '_blank'; a.rel = 'noopener'; });
   const form = $('form'), dateEl = $('date');
   const fields = {date: dateEl, loadin: $('loadin'), count: $('count'), damage: $('damage'), shell: $('shell')};
   const saveBtn = $('save-btn'), saveLabel = $('save-label');
@@ -263,7 +292,7 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
   async function call(action, payload){
     const body = Object.assign({action: action}, payload || {});
     if (MOCK) return MOCK(body);
-    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link (API_URL) in index.html.');
+    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link in config.js.');
     let res;
     try {
       const r = await fetch(API_URL, {
@@ -315,15 +344,18 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
     if (typed.length === PIN_LENGTH) tryPin(typed);
   }
 
-  async function tryPin(p){
-    pinBusy = true; setKeypad(false); setPinMsg('Checking…');
+  async function tryPin(p, quiet){
+    pinBusy = true; setKeypad(false); setPinMsg(quiet ? 'Opening…' : 'Checking…');
     try {
       const who = await call('login', {pin: p, page: 'coconut'});
       pin = p;
+      writeSession(p, who);
       typed = ''; renderDots(); setPinMsg('');
       showApp(who);
     } catch (err) {
-      typed = ''; renderDots(); wrongShake();
+      typed = ''; renderDots();
+      if (!quiet) wrongShake();
+      if (/Wrong PIN/.test(errText(err))) clearSession();
       setPinMsg(errText(err), true);
     } finally {
       pinBusy = false; setKeypad(true);
@@ -354,7 +386,7 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
     resetForm();
   }
 
-  $('lock-btn').addEventListener('click', () => showLogin('Locked. Enter the PIN to continue.'));
+  $('lock-btn').addEventListener('click', () => { clearSession(); if (goHome()) return; showLogin('Locked. Enter the PIN to continue.'); });
 
   /* ---------- entry form ---------- */
   function setDayWord(t){ document.querySelectorAll('.day-word').forEach(el => { el.textContent = t; }); }
@@ -405,7 +437,7 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
       saveLabel.textContent = hasEntry ? 'Update' : 'Save';
     } catch (err) {
       if (mine !== loadToken) return;
-      if (isPinError(err)) { showLogin(errText(err), true); return; }
+      if (isPinError(err)) { if (/Wrong PIN/.test(errText(err))) clearSession(); showLogin(errText(err), true); return; }
       setStatus(errText(err), 'bad');
     }
   }
@@ -480,7 +512,7 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
       $('s-by').textContent = (res && res.by) || (me && me.name) || '';
       form.hidden = true; $('saved').hidden = false;
     } catch (err) {
-      if (isPinError(err)) { showLogin(errText(err), true); return; }
+      if (isPinError(err)) { if (/Wrong PIN/.test(errText(err))) clearSession(); showLogin(errText(err), true); return; }
       setErr('save', errText(err));
     } finally {
       saveBtn.disabled = false; saveLabel.textContent = label;
@@ -492,7 +524,10 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
   /* ---------- start ---------- */
   if (!API_READY){
     setKeypad(false);
-    setPinMsg('This page is not connected yet: add the Apps Script link (API_URL) in index.html.', true);
+    setPinMsg('This page is not connected yet: add the Apps Script link in config.js.', true);
+  } else {
+    const s = readSession();
+    if (s) tryPin(s.pin, true);
   }
 })();
 </script>

@@ -121,6 +121,8 @@ input.caps{text-transform:uppercase}
 .key:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .who{margin-left:auto;color:var(--text);font-weight:600}
 .who + .lockbtn{margin-left:10px}
+.lockbtn + .lockbtn{margin-left:0}
+a.lockbtn{display:inline-flex;align-items:center;text-decoration:none}
 .lockbtn{margin-left:auto;height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .save-err{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--coral)}
@@ -133,9 +135,11 @@ input.caps{text-transform:uppercase}
 <body>
 <div class="app">
 
+<p class="note" id="modeNote" hidden>Preview</p>
+
 <section class="pin" id="pinView" aria-labelledby="pinTitle">
   <header class="top">
-    <div class="eyebrow"><i aria-hidden="true"></i>LS · Staff</div>
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Staff<a class="lockbtn homelink" href="index.html">Home</a></div>
     <h1 id="pinTitle">Enter your PIN</h1>
     <p class="ta-sub" lang="ta">உங்கள் PIN எண்</p>
   </header>
@@ -160,7 +164,7 @@ input.caps{text-transform:uppercase}
 </section>
 
 <header class="top" id="formHead" hidden>
-  <div class="eyebrow"><i aria-hidden="true"></i>LS · Staff<span class="who" id="whoName"></span><button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
+  <div class="eyebrow"><i aria-hidden="true"></i>LS · Staff<span class="who" id="whoName"></span><a class="lockbtn homelink" href="index.html">Home</a><button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button></div>
   <h1>Add staff</h1>
   <p class="ta-sub" lang="ta">புதிய பணியாளர்</p>
 </header>
@@ -178,7 +182,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <fieldset class="field" data-field="role" aria-describedby="role-err">
-    <legend class="label"><span>Role</span><span class="label-ta" lang="ta">பணி</span></legend>
+    <legend class="label"><span>Role<span class="opt">Optional</span></span><span class="label-ta" lang="ta">பணி</span></legend>
     <div class="choice">
       <label><input type="radio" name="role" value="Cook"><span>Cook</span></label>
       <label><input type="radio" name="role" value="Helper"><span>Helper</span></label>
@@ -202,7 +206,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="wa">
-    <label class="label" for="wa"><span>WhatsApp number</span><span class="label-ta" lang="ta">வாட்ஸ்அப் எண்</span></label>
+    <label class="label" for="wa"><span>WhatsApp number<span class="opt">Optional</span></span><span class="label-ta" lang="ta">வாட்ஸ்அப் எண்</span></label>
     <div class="control">
       <span class="prefix" aria-hidden="true">+91</span>
       <input id="wa" class="num" type="tel" inputmode="numeric" autocomplete="off" enterkeyhint="next" placeholder="98765 43210" aria-describedby="wa-err">
@@ -212,7 +216,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="address">
-    <label class="label" for="address"><span>Address</span><span class="label-ta" lang="ta">முகவரி</span></label>
+    <label class="label" for="address"><span>Address<span class="opt">Optional</span></span><span class="label-ta" lang="ta">முகவரி</span></label>
     <div class="control area">
       <textarea id="address" rows="3" autocomplete="off" aria-describedby="address-err"></textarea>
       <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
@@ -221,7 +225,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="joined">
-    <label class="label" for="joined"><span>Joining date</span><span class="label-ta" lang="ta">சேர்ந்த தேதி</span></label>
+    <label class="label" for="joined"><span>Joining date<span class="opt">Optional</span></span><span class="label-ta" lang="ta">சேர்ந்த தேதி</span></label>
     <div class="control">
       <input id="joined" class="num" type="date" enterkeyhint="next" aria-describedby="joined-err">
       <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
@@ -230,7 +234,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <fieldset class="field" data-field="stype" aria-describedby="stype-err">
-    <legend class="label"><span>Salary type</span><span class="label-ta" lang="ta">சம்பள வகை</span></legend>
+    <legend class="label"><span>Salary type<span class="opt">Optional</span></span><span class="label-ta" lang="ta">சம்பள வகை</span></legend>
     <div class="choice">
       <label><input type="radio" name="stype" value="month"><span>Monthly</span></label>
       <label><input type="radio" name="stype" value="day"><span>Daily wage</span></label>
@@ -239,7 +243,7 @@ input.caps{text-transform:uppercase}
   </fieldset>
 
   <div class="field" data-field="salary">
-    <label class="label" for="salary"><span id="salaryLabel">Salary</span><span class="label-ta" lang="ta" id="salaryLabelTa">சம்பளம்</span></label>
+    <label class="label" for="salary"><span><span id="salaryLabel">Salary</span><span class="opt">Optional</span></span><span class="label-ta" lang="ta" id="salaryLabelTa">சம்பளம்</span></label>
     <div class="control">
       <span class="prefix" aria-hidden="true">₹</span>
       <input id="salary" class="num" type="text" inputmode="numeric" enterkeyhint="next" aria-describedby="salary-err">
@@ -249,7 +253,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="advance">
-    <label class="label" for="advance"><span>Opening advance</span><span class="label-ta" lang="ta">முன்பணம் நிலுவை</span></label>
+    <label class="label" for="advance"><span>Opening advance<span class="opt">Optional</span></span><span class="label-ta" lang="ta">முன்பணம் நிலுவை</span></label>
     <div class="control">
       <span class="prefix" aria-hidden="true">₹</span>
       <input id="advance" class="num" type="text" inputmode="numeric" enterkeyhint="next" placeholder="0" aria-describedby="advance-err">
@@ -299,7 +303,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="emName">
-    <label class="label" for="emName"><span>Emergency contact name</span><span class="label-ta" lang="ta">அவசர தொடர்பு நபர்</span></label>
+    <label class="label" for="emName"><span>Emergency contact name<span class="opt">Optional</span></span><span class="label-ta" lang="ta">அவசர தொடர்பு நபர்</span></label>
     <div class="control">
       <input id="emName" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next" aria-describedby="emName-err">
       <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
@@ -308,7 +312,7 @@ input.caps{text-transform:uppercase}
   </div>
 
   <div class="field" data-field="emPhone">
-    <label class="label" for="emPhone"><span>Emergency contact number</span><span class="label-ta" lang="ta">அவசர தொடர்பு எண்</span></label>
+    <label class="label" for="emPhone"><span>Emergency contact number<span class="opt">Optional</span></span><span class="label-ta" lang="ta">அவசர தொடர்பு எண்</span></label>
     <div class="control">
       <span class="prefix" aria-hidden="true">+91</span>
       <input id="emPhone" class="num" type="tel" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="98765 43210" aria-describedby="emPhone-err">
@@ -418,18 +422,18 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
 
   var rules = {
     name: function () { return f.name.value.trim().length >= 2 ? '' : 'Type the staff name'; },
-    role: function () { return radio('role') ? '' : 'Pick a role'; },
+    role: function () { return ''; },
     phone: function () { return mobileMsg(digits(f.phone.value)); },
-    wa: function () { return mobileMsg(digits(f.wa.value)); },
-    address: function () { return f.address.value.trim().length >= 6 ? '' : 'Type the address'; },
+    wa: function () { var d = digits(f.wa.value); return d ? mobileMsg(d) : ''; },
+    address: function () { return ''; },
     joined: function () {
       var v = f.joined.value;
-      if (!v) return 'Pick the joining date';
+      if (!v) return '';
       return v > todayStr ? 'Joining date cannot be in the future' : '';
     },
-    stype: function () { return radio('stype') ? '' : 'Pick Monthly or Daily wage'; },
-    salary: function () { return Number(digits(f.salary.value) || 0) > 0 ? '' : 'Type the salary amount'; },
-    advance: function () { return f.advance.value.trim() === '' ? 'Type the amount' : ''; },
+    stype: function () { return radio('stype') || !digits(f.salary.value) ? '' : 'Pick Monthly or Daily wage'; },
+    salary: function () { return ''; },
+    advance: function () { return ''; },
     upi: function () { var d = digits(f.upi.value); return d ? mobileMsg(d) : ''; },
     acct: function () {
       var d = digits(f.acct.value);
@@ -446,8 +450,8 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
       if (f.bank.value.trim().length >= 2) return '';
       return hasBank() ? 'Type the bank name' : '';
     },
-    emName: function () { return f.emName.value.trim().length >= 2 ? '' : 'Type the emergency contact name'; },
-    emPhone: function () { return mobileMsg(digits(f.emPhone.value)); }
+    emName: function () { return ''; },
+    emPhone: function () { var d = digits(f.emPhone.value); return d ? mobileMsg(d) : ''; }
   };
 
   function fieldEl(k) { return form.querySelector('[data-field="' + k + '"]'); }
@@ -484,7 +488,7 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
     });
   });
 
-  f.salary.addEventListener('input', function () { f.salary.value = fmtINR(digits(f.salary.value).slice(0, 8)); });
+  f.salary.addEventListener('input', function () { f.salary.value = fmtINR(digits(f.salary.value).slice(0, 8)); refresh('stype'); });
 
   f.advance.addEventListener('input', function () {
     f.advance.value = fmtINR(digits(f.advance.value).slice(0, 8));
@@ -590,19 +594,22 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
 
     $('vName').textContent = f.name.value.trim();
     $('vRole').textContent = radio('role');
+    $('vRole').hidden = !radio('role');
     $('vPhone').textContent = '+91 ' + fmtPhone(ph);
     $('vPhone').href = 'tel:+91' + ph;
-    $('vWa').textContent = '+91 ' + fmtPhone(wa);
-    $('vWa').href = 'https://wa.me/91' + wa;
-    $('vAddr').textContent = f.address.value.trim();
-    $('vJoined').textContent = joinedText;
-    $('vSalary').textContent = '₹' + sal + (t === 'day' ? ' / day' : ' / month');
+    $('vWa').textContent = wa ? '+91 ' + fmtPhone(wa) : '—';
+    if (wa) { $('vWa').href = 'https://wa.me/91' + wa; } else { $('vWa').removeAttribute('href'); }
+    $('vWa').classList.toggle('muted', !wa);
+    dash($('vAddr'), f.address.value.trim());
+    dash($('vJoined'), joined ? joinedText : '');
+    dash($('vSalary'), digits(f.salary.value) ? '₹' + sal + (t === 'day' ? ' / day' : ' / month') : '');
     $('vAdvance').textContent = '₹' + adv;
     dash($('vUpi'), upi ? '+91 ' + fmtPhone(upi) : '');
     dash($('vAcct'), acct ? fmtAcct(acct) : '');
     dash($('vIfsc'), cleanIfsc(f.ifsc.value));
     dash($('vBank'), f.bank.value.trim());
-    $('vEm').textContent = f.emName.value.trim() + ' · +91 ' + fmtPhone(digits(f.emPhone.value));
+    var emN = f.emName.value.trim(), emP = digits(f.emPhone.value);
+    dash($('vEm'), [emN, emP ? '+91 ' + fmtPhone(emP) : ''].filter(Boolean).join(' · '));
 
     form.hidden = true;
     head.hidden = true;
@@ -658,7 +665,7 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
       joined: f.joined.value,
       salaryType: radio('stype'),
       salary: digits(f.salary.value),
-      advance: digits(f.advance.value),
+      advance: digits(f.advance.value) || '0',
       upi: digits(f.upi.value),
       acct: digits(f.acct.value),
       ifsc: cleanIfsc(f.ifsc.value),
@@ -679,12 +686,39 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
   // The PIN is asked every time the page opens and is never stored on the phone.
   try { localStorage.removeItem(OLD_PIN_KEY); } catch (e) {}   // clears a PIN saved by the older version
 
+  /* ---------- login from the home screen ---------- */
+  // The home screen (index.html) keeps the PIN for this browser tab only, so this page opens without asking again.
+  // It is cleared by Lock, by closing the tab, or after 12 hours.
+  var SESSION_KEY = 'ls-session', SESSION_HOURS = 12;
+  function readSession() {
+    try {
+      var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.pin && s.until > Date.now()) return s;
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+    return null;
+  }
+  function writeSession(p, who) {
+    try {
+      var old = readSession(), same = old && old.pin === p;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        pin: p, name: who.name, role: who.role,
+        pages: same ? (old.pages || []) : [],
+        until: same ? old.until : Date.now() + SESSION_HOURS * 3600 * 1000
+      }));
+    } catch (e) {}
+  }
+  function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {} }
+  // On the website Lock goes back to the home screen. The preview has no home screen next to it, so it stays here.
+  function goHome() { if (MOCK) return false; window.location.href = 'index.html'; return true; }
+  if (window.__LS_HOME__) document.querySelectorAll('.homelink').forEach(function (a) { a.href = window.__LS_HOME__; a.target = '_blank'; a.rel = 'noopener'; });
+
   // Sends a request to the Apps Script (Code.gs) and returns its data.
   // No Google sign-in is sent (credentials: 'omit'), so several logged-in Google accounts don't matter.
   async function call(action, payload) {
     var body = Object.assign({ action: action }, payload || {});
     if (MOCK) return MOCK(body);
-    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link (API_URL) in this file.');
+    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link in config.js.');
     var res;
     try {
       var r = await fetch(API_URL, {
@@ -723,15 +757,18 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
     if (typed.length === PIN_LENGTH) tryPin(typed);
   }
 
-  async function tryPin(p) {
-    pinBusy = true; setKeypad(false); setPinMsg('Checking…');
+  async function tryPin(p, quiet) {
+    pinBusy = true; setKeypad(false); setPinMsg(quiet ? 'Opening…' : 'Checking…');
     try {
       var me = await call('login', { pin: p, page: 'staff' });
       pin = p;
+      writeSession(p, me);
       typed = ''; renderDots(); setPinMsg('');
       showApp(me);
     } catch (err) {
-      typed = ''; renderDots(); wrongShake();
+      typed = ''; renderDots();
+      if (!quiet) wrongShake();
+      if (/Wrong PIN/.test(errText(err))) clearSession();
       setPinMsg(errText(err), true);
     } finally {
       pinBusy = false; setKeypad(true);
@@ -779,7 +816,7 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
       savedId = res.id;
       showDone(res);
     } catch (err) {
-      if (isPinError(err)) { showLogin(errText(err), true); return; }
+      if (isPinError(err)) { if (/Wrong PIN/.test(errText(err))) clearSession(); showLogin(errText(err), true); return; }
       $('saveErr').textContent = errText(err);
     } finally {
       saving = false; $('saveBtn').disabled = false; setLabel();
@@ -788,13 +825,18 @@ const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LIN
 
   lockBtn.addEventListener('click', function () {
     clearForm();
+    clearSession();
+    if (goHome()) return;
     showLogin('Locked. Enter your PIN to continue.');
   });
 
   /* ---------- start ---------- */
   if (!API_READY) {
     setKeypad(false);
-    setPinMsg('This page is not connected yet: add the Apps Script link (API_URL) in this file.', true);
+    setPinMsg('This page is not connected yet: add the Apps Script link in config.js.', true);
+  } else {
+    var s = readSession();
+    if (s) tryPin(s.pin, true);
   }
 })();
 </script>

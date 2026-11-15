@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#15130F">
 <title>LS Log</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23F2B33D'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Arial,sans-serif' font-weight='700' font-size='28' fill='%231F1606'%3ELS%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
@@ -14,121 +13,333 @@
   color-scheme:dark;
   --bg:#15130F; --surface:#201D18; --surface2:#2A261F; --line:#3A342B;
   --text:#F4EFE6; --dim:#B5AC9C; --faint:#9C9384;
-  --gold:#F2B33D; --ink:#1F1606; --mint:#6FD3A4;
+  --gold:#F2B33D; --ink:#1F1606; --mint:#6FD3A4; --coral:#FF8F73;
   --num:'Space Grotesk','Hind Madurai',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html{background:#0E0C09}
 body{margin:0;color:var(--text);font-family:'Hind Madurai',system-ui,sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
-.app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);display:flex;flex-direction:column}
-@media (min-width:640px){
-  .app{margin:32px auto;min-height:auto;border-radius:32px;box-shadow:0 0 0 1px #2A261F,0 30px 80px rgba(0,0,0,.5)}
-}
+.app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);padding:28px 20px 36px;display:flex;flex-direction:column;gap:18px}
+@media (min-width:640px){.app{margin:32px auto;min-height:auto;border-radius:32px;box-shadow:0 0 0 1px #2A261F,0 30px 80px rgba(0,0,0,.5)}}
 
-/* header */
-.top{padding:28px 20px 8px;display:flex;align-items:center;gap:14px}
-.logo{flex:none;width:56px;height:56px;border-radius:16px;background:var(--gold);color:var(--ink);display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:22px;letter-spacing:.02em}
-.title{display:flex;flex-direction:column;min-width:0}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--dim);margin-bottom:6px}
+.eyebrow i{width:8px;height:8px;border-radius:99px;background:var(--gold)}
 h1{margin:0;font-family:var(--num);font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.15}
-.ta-sub{margin:0;font-size:16px;color:var(--dim)}
-.today{margin:0;padding:0 20px;font-size:14px;font-weight:600;color:var(--dim);display:flex;align-items:center;gap:8px}
-.today i{width:8px;height:8px;border-radius:99px;background:var(--gold)}
+.ta-sub{margin:0;font-size:17px;color:var(--dim)}
+.lockbtn{flex:none;height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.note{margin:0;font-size:14px;color:var(--dim);background:var(--surface);border-radius:12px;padding:8px 12px}
 
-/* sections */
-main{padding:20px 20px 28px;display:flex;flex-direction:column;gap:26px;flex:1}
-section{display:flex;flex-direction:column;gap:10px}
-.sec{margin:0;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--dim)}
-.sec .ta{font-weight:500;font-size:13px}
-.pill{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:2px 10px}
+/* PIN screen */
+.pin{background:var(--surface);border-radius:22px;padding:22px 16px 18px;display:flex;flex-direction:column;gap:18px}
+.pin-head{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.pin-head b{font-size:19px;font-weight:600}
+.pin-head span{font-size:14px;color:var(--dim)}
+.dots{display:flex;gap:14px;justify-content:center}
+.dot{width:16px;height:16px;border-radius:99px;border:2px solid var(--faint);background:transparent}
+.dot.on{background:var(--gold);border-color:var(--gold)}
+.dots.wrong .dot{border-color:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .dots.wrong{animation:shake .35s ease-in-out}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+}
+.pin-msg{margin:0;min-height:1.45em;text-align:center;font-size:15px;color:var(--dim)}
+.pin-msg.bad{color:var(--coral);font-weight:600}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.key{height:64px;border:0;border-radius:16px;background:var(--surface2);box-shadow:inset 0 0 0 1.5px var(--line);color:var(--text);font-family:var(--num);font-size:26px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.key.word{font-family:inherit;font-size:16px}
+.key:active{background:var(--line)}
+.key:disabled{opacity:.5;cursor:default}
+.key:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
-/* link tiles */
-.tile{display:flex;align-items:center;gap:14px;min-height:84px;padding:14px 16px;border-radius:20px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);color:var(--text);text-decoration:none;transition:box-shadow .15s,background .15s}
-.tile:hover{box-shadow:inset 0 0 0 1.5px var(--faint)}
-.tile:active{background:var(--surface2);transform:translateY(1px)}
-.tile:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.ico{flex:none;width:52px;height:52px;border-radius:16px;background:var(--surface2);display:grid;place-items:center;color:var(--gold)}
-.ico.kitchen{color:var(--mint)}
-.txt{display:flex;flex-direction:column;min-width:0;flex:1}
-.t{font-family:var(--num);font-size:19px;font-weight:600;line-height:1.25}
-.txt .ta{font-size:14px;color:var(--dim)}
-.go{flex:none;color:var(--faint)}
-
-footer{padding:0 20px calc(24px + env(safe-area-inset-bottom));font-size:14px;color:var(--faint)}
-footer p{margin:0}
-@media (prefers-reduced-motion:reduce){*{transition:none !important}.tile:active{transform:none}}
+/* home */
+.hello{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.role{font-size:13px;font-weight:700;letter-spacing:.02em;border-radius:99px;padding:3px 12px;background:var(--gold);color:var(--ink)}
+.role.manager{background:var(--mint);color:#0F2A1E}
+.role.other{background:var(--surface2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.group{display:flex;flex-direction:column;gap:10px}
+.group h2{margin:0;display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:700;color:var(--dim)}
+.group h2 span{font-weight:500;font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-height:104px;padding:14px;border-radius:18px;background:var(--surface);color:var(--text);text-decoration:none;box-shadow:inset 0 0 0 1.5px transparent}
+a.tile:hover,a.tile:focus-visible{box-shadow:inset 0 0 0 1.5px var(--gold);outline:none}
+a.tile:active{transform:translateY(1px)}
+.tile svg{color:var(--gold)}
+.tile b{display:block;font-size:16px;font-weight:600;line-height:1.25}
+.tile small{display:block;font-size:13px;color:var(--dim)}
+.tile.soon{background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--faint)}
+.tile.soon svg{color:var(--faint)}
+.tile.soon small{color:var(--faint)}
+.soon-tag{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;color:var(--faint);border:1px solid var(--line);border-radius:99px;padding:0 8px}
+.empty{margin:0;font-size:15px;color:var(--dim)}
 </style>
 </head>
 <body>
 <div class="app">
 
 <header class="top">
-  <div class="logo" aria-hidden="true">LS</div>
-  <div class="title">
-    <h1>LS Log</h1>
-    <p class="ta-sub" lang="ta">தினசரி பதிவுகள்</p>
+  <div>
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Home</div>
+    <h1 id="title">LS Log</h1>
+    <p class="ta-sub" lang="ta" id="titleTa">தினசரி பதிவு</p>
   </div>
+  <button type="button" class="lockbtn" id="lockBtn" hidden>Lock</button>
 </header>
-<p class="today"><i aria-hidden="true"></i><span id="today">Today</span></p>
 
-<main>
+<p class="note" id="modeNote" hidden>Preview</p>
 
-  <section aria-labelledby="kitchenHead">
-    <h2 class="sec" id="kitchenHead">
-      <span>Kitchen</span><span class="ta" lang="ta">சமையலறை</span>
-      <span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>All staff</span>
-    </h2>
-    <a class="tile" href="coconut.html">
-      <span class="ico kitchen" aria-hidden="true">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10h19a9.5 9.5 0 0 1-19 0z"></path><path d="M6.5 10a5.5 5.5 0 0 0 11 0"></path><path d="M12 6.5c.6-1.9 2.1-3 4-3.2M12 6.5c-.6-1.6-1.9-2.6-3.5-2.8"></path></svg>
-      </span>
-      <span class="txt">
-        <span class="t">Coconut Daily Log</span>
-        <span class="ta" lang="ta">தேங்காய் தினசரி கணக்கு</span>
-      </span>
-      <svg class="go" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
-    </a>
-  </section>
+<!-- PIN screen -->
+<section class="pin" id="pinView" aria-labelledby="pinTitle">
+  <div class="pin-head">
+    <b id="pinTitle">Enter your PIN</b>
+    <span lang="ta">உங்கள் PIN எண்ணை உள்ளிடுங்கள்</span>
+  </div>
+  <div class="dots" id="dots" aria-hidden="true">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <p class="pin-msg" id="pinMsg" role="status" aria-live="polite"></p>
+  <div class="keypad">
+    <button type="button" class="key" data-key="1">1</button>
+    <button type="button" class="key" data-key="2">2</button>
+    <button type="button" class="key" data-key="3">3</button>
+    <button type="button" class="key" data-key="4">4</button>
+    <button type="button" class="key" data-key="5">5</button>
+    <button type="button" class="key" data-key="6">6</button>
+    <button type="button" class="key" data-key="7">7</button>
+    <button type="button" class="key" data-key="8">8</button>
+    <button type="button" class="key" data-key="9">9</button>
+    <button type="button" class="key word" data-key="clear">Clear</button>
+    <button type="button" class="key" data-key="0">0</button>
+    <button type="button" class="key word" data-key="back" aria-label="Delete last digit">⌫</button>
+  </div>
+</section>
 
-  <section aria-labelledby="ownerHead">
-    <h2 class="sec" id="ownerHead">
-      <span>Owner</span><span class="ta" lang="ta">உரிமையாளர்</span>
-      <span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Owner only</span>
-    </h2>
-    <a class="tile" href="vendor.html">
-      <span class="ico" aria-hidden="true">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5h11v10h-11z"></path><path d="M13.5 9.5h4l3.5 3.5v3.5h-7.5"></path><circle cx="6.5" cy="17.5" r="2" fill="#2A261F"></circle><circle cx="17" cy="17.5" r="2" fill="#2A261F"></circle></svg>
-      </span>
-      <span class="txt">
-        <span class="t">Add vendor</span>
-        <span class="ta" lang="ta">புதிய விற்பனையாளர்</span>
-      </span>
-      <svg class="go" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
-    </a>
-    <a class="tile" href="staff.html">
-      <span class="ico" aria-hidden="true">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.5"></circle><path d="M3.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"></path><path d="M19 8v6M16 11h6"></path></svg>
-      </span>
-      <span class="txt">
-        <span class="t">Add staff</span>
-        <span class="ta" lang="ta">புதிய பணியாளர்</span>
-      </span>
-      <svg class="go" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
-    </a>
-  </section>
-
-</main>
-
-<footer>
-  <p>Every page asks for your own PIN each time it opens, so each entry is saved under your name.</p>
-</footer>
+<!-- Home: tiles for this person's role -->
+<section id="homeView" hidden aria-labelledby="helloName">
+  <div class="hello">
+    <span style="font-size:17px">Hello, <b id="helloName"></b></span>
+    <span class="role" id="rolePill"></span>
+  </div>
+</section>
+<div class="group" id="gEntries" hidden>
+  <h2>Entries <span lang="ta">பதிவுகள்</span></h2>
+  <div class="tiles" id="tEntries"></div>
+</div>
+<div class="group" id="gViews" hidden>
+  <h2>Views <span lang="ta">பார்வை</span></h2>
+  <div class="tiles" id="tViews"></div>
+</div>
+<div class="group" id="gSetup" hidden>
+  <h2>Setup <span lang="ta">அமைப்பு</span></h2>
+  <div class="tiles" id="tSetup"></div>
+</div>
+<p class="empty" id="noPages" hidden>This PIN has no pages yet. Ask the owner.</p>
 
 </div>
+
+<script src="config.js"></script>
+<script>
+const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LINK';   // set in config.js
+</script>
 <script>
 (function () {
-  try {
-    document.getElementById('today').textContent =
-      new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-  } catch (e) {}
+  var $ = function (id) { return document.getElementById(id); };
+  var PIN_LENGTH = 6;
+  var MOCK = window.__LS_MOCK__ || null;   // preview only
+  var PREVIEW = !!window.__LS_PREVIEW__;
+  var API_READY = !!MOCK || /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(API_URL);
+  if (PREVIEW) $('modeNote').hidden = false;
+
+  /* ---------- the login is kept for this browser tab only ---------- */
+  // After the PIN is entered here, the other LS pages open without asking again.
+  // It is cleared by Lock, by closing the tab, or after 12 hours.
+  var SESSION_KEY = 'ls-session', SESSION_HOURS = 12;
+  function readSession() {
+    try {
+      var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.pin && s.until > Date.now()) return s;
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+    return null;
+  }
+  function writeSession(pin, who) {
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        pin: pin, name: who.name, role: who.role, pages: who.pages || [],
+        until: Date.now() + SESSION_HOURS * 3600 * 1000
+      }));
+    } catch (e) {}
+  }
+  function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {} }
+
+  /* ---------- the pages ---------- */
+  // key = the page name in ACCESS (Code.js). Tiles without a file are not built yet.
+  var PAGES = [
+    { key: 'coconut',  group: 'Entries', en: 'Coconut log',     ta: 'தேங்காய் பதிவு',  file: 'coconut.html', icon: 'coconut' },
+    { key: 'expenses', group: 'Entries', en: 'Expenses',        ta: 'செலவுகள்',        icon: 'bag' },
+    { key: 'bills',    group: 'Entries', en: 'Bill entry',      ta: 'பில் பதிவு',       icon: 'bill' },
+    { key: 'payments', group: 'Entries', en: 'Payment entry',   ta: 'பணம் செலுத்துதல்', icon: 'wallet' },
+    { key: 'salary',   group: 'Entries', en: 'Salary entry',    ta: 'சம்பளம் பதிவு',    icon: 'people' },
+    { key: 'sales',    group: 'Entries', en: 'Sales entry',     ta: 'விற்பனை பதிவு',    icon: 'chart' },
+    { key: 'summary',  group: 'Views',   en: 'Daily summary',   ta: 'தினசரி சுருக்கம்',  icon: 'chart' },
+    { key: 'balances', group: 'Views',   en: 'Vendor balances', ta: 'விற்பனையாளர் நிலுவை', icon: 'wallet' },
+    { key: 'vendors',  group: 'Setup',   en: 'Add vendor',      ta: 'புதிய விற்பனையாளர்', file: 'vendor.html', icon: 'store' },
+    { key: 'staff',    group: 'Setup',   en: 'Add staff',       ta: 'புதிய பணியாளர்',   file: 'staff.html', icon: 'person' }
+  ];
+  // Preview only: the tiles open the preview pages instead of the files on the website.
+  var PREVIEW_LINKS = {
+    coconut: 'https://claude.ai/artifact/K11mAZf67kjJ2vEtz41r1a',
+    vendors: 'https://claude.ai/artifact/Q14jUMTxNBnWNJQVCiymC7',
+    staff: 'https://claude.ai/artifact/RGjEwv9CzcgcbPrXKeuaJY'
+  };
+  var ICONS = {
+    coconut: '<circle cx="12" cy="12.5" r="7.5"></circle><circle cx="10" cy="10.5" r="1" fill="currentColor" stroke="none"></circle><circle cx="14" cy="10.5" r="1" fill="currentColor" stroke="none"></circle><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"></circle>',
+    bag: '<path d="M5 8h14l-1 12H6L5 8z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path>',
+    bill: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"></path><path d="M9 8h6M9 12h6"></path>',
+    wallet: '<rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path><path d="M16 14.5h2"></path>',
+    people: '<circle cx="9" cy="8" r="3"></circle><path d="M3.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M16.5 14.5c2.5.2 4.2 2.2 4.2 5"></path>',
+    chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path>',
+    box: '<path d="M3 8l9-5 9 5v8l-9 5-9-5V8z"></path><path d="M3 8l9 5 9-5M12 13v8"></path>',
+    store: '<path d="M4 10h16"></path><path d="M5 10l1.5-5h11L19 10"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-5h4v5"></path>',
+    person: '<circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"></path>'
+  };
+  function icon(name) {
+    return '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[name] + '</svg>';
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  // Owner and manager also see what's coming; other roles see only the pages they can open.
+  function renderHome(who) {
+    var allowed = who.pages || [];
+    var seesPlans = who.role === 'owner' || who.role === 'manager';
+    var groups = { Entries: [], Views: [], Setup: [] };
+    PAGES.forEach(function (p) {
+      var built = !!p.file;
+      var open = allowed.indexOf(p.key) !== -1;
+      if (built && open) {
+        var href = PREVIEW ? (PREVIEW_LINKS[p.key] || '#') : p.file;
+        var attrs = PREVIEW ? ' target="_blank" rel="noopener"' : '';
+        groups[p.group].push('<a class="tile" href="' + href + '"' + attrs + '>' + icon(p.icon) +
+          '<span><b>' + esc(p.en) + '</b><small lang="ta">' + esc(p.ta) + '</small></span></a>');
+      } else if (!built && (open || (seesPlans && p.group !== 'Setup'))) {
+        groups[p.group].push('<div class="tile soon" aria-disabled="true"><span class="soon-tag">Soon</span>' + icon(p.icon) +
+          '<span><b>' + esc(p.en) + '</b><small lang="ta">' + esc(p.ta) + '</small></span></div>');
+      }
+    });
+    var any = false;
+    [['Entries', 'gEntries', 'tEntries'], ['Views', 'gViews', 'tViews'], ['Setup', 'gSetup', 'tSetup']].forEach(function (g) {
+      $(g[2]).innerHTML = groups[g[0]].join('');
+      $(g[1]).hidden = !groups[g[0]].length;
+      if (groups[g[0]].length) any = true;
+    });
+    $('noPages').hidden = any;
+    $('helloName').textContent = who.name;
+    var pill = $('rolePill');
+    var r = String(who.role || '');
+    pill.textContent = r === 'owner' ? 'Owner view' : (r === 'manager' ? 'Manager view' : r.charAt(0).toUpperCase() + r.slice(1));
+    pill.className = 'role' + (r === 'owner' ? '' : (r === 'manager' ? ' manager' : ' other'));
+  }
+
+  /* ---------- talking to the Apps Script ---------- */
+  async function call(action, payload) {
+    var body = Object.assign({ action: action }, payload || {});
+    if (MOCK) return MOCK(body);
+    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link in config.js.');
+    var res;
+    try {
+      var r = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body),
+        credentials: 'omit',
+        redirect: 'follow'
+      });
+      res = await r.json();
+    } catch (e) {
+      throw new Error('Could not reach the sheet. Check the internet and try again.');
+    }
+    if (!res || res.ok !== true) throw new Error((res && res.error) || 'Something went wrong. Try again.');
+    return res.data;
+  }
+  function errText(err) {
+    var m = (err && err.message) ? err.message : String(err || '');
+    return m.replace(/^(Exception|Error):\s*/i, '') || 'Something went wrong. Try again.';
+  }
+
+  /* ---------- PIN keypad ---------- */
+  var typed = '', busy = false;
+  var pinView = $('pinView');
+  function setPinMsg(t, bad) { var el = $('pinMsg'); el.textContent = t; el.classList.toggle('bad', !!bad); }
+  function renderDots() { pinView.querySelectorAll('.dot').forEach(function (d, i) { d.classList.toggle('on', i < typed.length); }); }
+  function setKeypad(on) { pinView.querySelectorAll('.key').forEach(function (k) { k.disabled = !on; }); }
+  function wrongShake() { var d = $('dots'); d.classList.remove('wrong'); void d.offsetWidth; d.classList.add('wrong'); }
+
+  function pressKey(k) {
+    if (busy) return;
+    if (k === 'back') typed = typed.slice(0, -1);
+    else if (k === 'clear') typed = '';
+    else if (typed.length < PIN_LENGTH) typed += k;
+    $('dots').classList.remove('wrong');
+    setPinMsg('');
+    renderDots();
+    if (typed.length === PIN_LENGTH) tryPin(typed);
+  }
+  async function tryPin(p) {
+    busy = true; setKeypad(false); setPinMsg('Checking…');
+    try {
+      var who = await call('home', { pin: p });
+      writeSession(p, who);
+      typed = ''; renderDots(); setPinMsg('');
+      showHome(who);
+    } catch (err) {
+      typed = ''; renderDots(); wrongShake();
+      setPinMsg(errText(err), true);
+    } finally {
+      busy = false; setKeypad(true);
+    }
+  }
+  pinView.querySelectorAll('.key').forEach(function (b) { b.addEventListener('click', function () { pressKey(b.dataset.key); }); });
+  document.addEventListener('keydown', function (e) {
+    if (pinView.hidden) return;
+    if (/^[0-9]$/.test(e.key)) pressKey(e.key);
+    else if (e.key === 'Backspace') pressKey('back');
+    else if (e.key === 'Escape') pressKey('clear');
+  });
+
+  function showHome(who) {
+    renderHome(who);
+    pinView.hidden = true;
+    $('homeView').hidden = false; $('lockBtn').hidden = false;
+  }
+  function showLogin(message, bad) {
+    typed = ''; renderDots();
+    ['homeView', 'gEntries', 'gViews', 'gSetup', 'noPages', 'lockBtn'].forEach(function (id) { $(id).hidden = true; });
+    pinView.hidden = false;
+    setPinMsg(message || '', bad);
+  }
+  $('lockBtn').addEventListener('click', function () {
+    clearSession();
+    showLogin('Locked. Enter your PIN to continue.');
+  });
+
+  /* ---------- start ---------- */
+  if (!API_READY) {
+    setKeypad(false);
+    setPinMsg('This page is not connected yet: add the Apps Script link in config.js.', true);
+  } else {
+    var s = readSession();
+    if (s) {
+      // Show the tiles straight away, then check the PIN is still valid (it may have been changed).
+      showHome(s);
+      call('home', { pin: s.pin })
+        .then(function (who) { writeSession(s.pin, who); showHome(who); })
+        .catch(function (err) {
+          if (/PIN/.test(errText(err))) { clearSession(); showLogin(errText(err), true); }
+        });
+    }
+  }
 })();
 </script>
 </body>
