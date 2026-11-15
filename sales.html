@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#15130F">
+<title>LS — Sales entry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#15130F; --surface:#201D18; --surface2:#2A261F; --line:#3A342B;
+  --text:#F4EFE6; --dim:#B5AC9C; --faint:#9C9384;
+  --gold:#F2B33D; --ink:#1F1606; --mint:#6FD3A4; --coral:#FF8F73;
+  --num:'Space Grotesk','Hind Madurai',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+html{background:#0E0C09}
+body{margin:0;color:var(--text);font-family:'Hind Madurai',system-ui,sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.app{max-width:480px;margin:0 auto;height:100vh;height:100dvh;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:640px){
+  .app{margin:24px auto;height:min(900px,calc(100vh - 48px));border-radius:32px;box-shadow:0 0 0 1px #2A261F,0 30px 80px rgba(0,0,0,.5)}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+
+/* header */
+.top{flex:none;padding:20px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--dim);margin-bottom:4px}
+.eyebrow i{width:8px;height:8px;border-radius:99px;background:var(--gold)}
+h1{margin:0;font-family:var(--num);font-size:26px;font-weight:600;line-height:1.1}
+.ta-sub{margin:0;font-size:15px;color:var(--dim)}
+.date{display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:12px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line)}
+.date:focus-within{box-shadow:inset 0 0 0 2px var(--gold)}
+.date input{border:0;outline:0;background:transparent;color:var(--text);font-family:var(--num);font-size:15px;padding:8px 0;min-height:40px}
+.date input::-webkit-calendar-picker-indicator{filter:invert(.8);cursor:pointer}
+
+/* session tabs */
+.tabs{flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 16px 8px;padding:4px;border-radius:16px;background:var(--surface)}
+.tab{min-height:52px;border:0;border-radius:12px;background:transparent;color:var(--dim);font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;padding:4px}
+.tab b{font-size:15px;font-weight:600}
+.tab small{font-family:var(--num);font-size:12px}
+.tab[aria-selected="true"]{background:var(--gold);color:var(--ink)}
+.tab:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+
+/* field list (top half, scrolls) */
+.list{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 16px 8px;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:58px;padding:8px 16px;border:0;border-radius:14px;background:var(--surface);color:var(--text);font:inherit;text-align:left;cursor:pointer;flex:none}
+.row:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.row[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--gold);background:#2A2416}
+.lab{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.lab b{font-size:15px;font-weight:600}
+.lab small{font-size:12px;color:var(--dim)}
+.val{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:20px;font-weight:600;white-space:nowrap}
+.val.empty{color:var(--faint);font-weight:500}
+.caret{display:inline-block;width:2px;height:20px;margin-left:2px;background:var(--gold);vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.ro{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;padding:8px 16px;border-radius:14px;background:var(--surface2);flex:none}
+.ro .right{display:flex;align-items:center;gap:10px}
+.ro .val.pos{color:var(--coral)}
+.ro .val.neg{color:var(--gold)}
+.ro .val.zero{color:var(--mint)}
+.lock{flex:none;color:var(--faint)}
+
+/* summary + keypad (bottom, fixed) */
+.bottom{flex:none;border-top:1px solid var(--surface2);background:var(--bg);padding:10px 16px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+.sum{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 4px;font-size:14px;color:var(--dim)}
+.sum b{font-family:var(--num);font-size:20px;font-weight:600;color:var(--text)}
+.sum .ub b{font-size:16px}
+.sum .ub.pos b{color:var(--coral)}
+.pad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-areas:"k1 k2 k3 del" "k4 k5 k6 nxt" "k7 k8 k9 nxt" "k0 k0 k00 nxt";gap:8px}
+.key{min-height:52px;border:0;border-radius:14px;background:var(--surface2);color:var(--text);font-family:var(--num);font-size:24px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.key:active{background:var(--line)}
+.key:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.key.fn{font-family:'Hind Madurai',system-ui,sans-serif;font-size:15px;font-weight:600;color:var(--dim)}
+.key.next{background:var(--surface);color:var(--gold);box-shadow:inset 0 0 0 1.5px var(--gold);flex-direction:column;gap:2px}
+.save{min-height:56px;border:0;border-radius:16px;background:var(--gold);color:var(--ink);font:inherit;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.save:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.save:active{transform:translateY(1px)}
+
+/* saved view */
+.done{flex:1;min-height:0;overflow-y:auto;padding:28px 20px 20px;display:flex;flex-direction:column;gap:14px}
+.done-head{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.tick{width:88px;height:88px;border-radius:99px;background:#1C3329;box-shadow:0 0 0 10px rgba(111,211,164,.08);color:var(--mint);display:flex;align-items:center;justify-content:center;animation:pop .5s ease-out both}
+.tick path{stroke-dasharray:24;animation:draw .45s .3s ease-out both}
+.done h2{margin:0;font-family:var(--num);font-size:26px;font-weight:600;outline:none}
+.card{background:var(--surface);border-radius:20px;padding:12px 16px;display:flex;flex-direction:column;animation:rise .4s .3s ease-out both}
+.card h3{margin:0 0 4px;font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}
+.card h3 span{font-family:var(--num)}
+.c-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-top:1px solid var(--surface2);font-size:15px}
+.c-row .k{color:var(--dim);font-size:14px}
+.c-row.big{font-size:20px;font-weight:700;border-top:0;padding-top:2px}
+.c-row .pos{color:var(--coral);font-weight:700}
+.c-row .neg{color:var(--gold);font-weight:700}
+.btn{display:flex;align-items:center;justify-content:center;min-height:56px;border:0;border-radius:16px;background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line);font:inherit;font-size:17px;font-weight:700;cursor:pointer}
+.btn:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+@keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* PIN screen, Home / Lock */
+.app.pin-on > :not(#pinView):not(.sr){display:none !important}
+.app:not(.pin-on) > #pinView{display:none !important}
+.pin{padding:28px 20px 28px;display:flex;flex-direction:column;gap:22px;flex:1;overflow-y:auto}
+.pin-top{display:flex;flex-direction:column;gap:2px}
+.pin-top h1{font-size:30px}
+.pin-top .ta-sub{font-size:17px}
+.dots{display:flex;gap:14px;justify-content:center;margin-top:10px}
+.dot{width:16px;height:16px;border-radius:99px;border:2px solid var(--faint);background:transparent}
+.dot.on{background:var(--gold);border-color:var(--gold)}
+.dots.wrong .dot{border-color:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .dots.wrong{animation:shake .35s ease-in-out}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+}
+.pin-msg{margin:0;min-height:1.45em;text-align:center;font-size:15px;color:var(--dim)}
+.pin-msg.bad{color:var(--coral);font-weight:600}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:auto}
+.pkey{height:64px;border:0;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);color:var(--text);font-family:var(--num);font-size:26px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.pkey.word{font-family:inherit;font-size:16px}
+.pkey:active{background:var(--surface2)}
+.pkey:disabled{opacity:.5;cursor:default}
+.pkey:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.me{margin-left:auto;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.me + .lockbtn{margin-left:10px}
+.lockbtn + .lockbtn{margin-left:0}
+a.lockbtn{display:inline-flex;align-items:center;text-decoration:none}
+.lockbtn{flex:none;margin-left:auto;height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.save-err{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--coral)}
+.save-err:empty{display:none}
+.btn:disabled,.save:disabled{opacity:.6;cursor:progress}
+.top{flex-wrap:wrap}
+.top > .eyebrow{flex:1 0 100%;margin-bottom:0}
+</style>
+</head>
+<body>
+<div class="app pin-on">
+
+<section class="pin" id="pinView" aria-labelledby="pinTitle">
+  <header class="pin-top">
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Sales<a class="lockbtn homelink" href="index.html">Home</a></div>
+    <h1 id="pinTitle">Enter your PIN</h1>
+    <p class="ta-sub" lang="ta">உங்கள் PIN எண்</p>
+  </header>
+  <div class="dots" id="dots" aria-hidden="true">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <p class="pin-msg" id="pinMsg" role="status" aria-live="polite"></p>
+  <div class="keypad">
+    <button type="button" class="pkey" data-key="1">1</button>
+    <button type="button" class="pkey" data-key="2">2</button>
+    <button type="button" class="pkey" data-key="3">3</button>
+    <button type="button" class="pkey" data-key="4">4</button>
+    <button type="button" class="pkey" data-key="5">5</button>
+    <button type="button" class="pkey" data-key="6">6</button>
+    <button type="button" class="pkey" data-key="7">7</button>
+    <button type="button" class="pkey" data-key="8">8</button>
+    <button type="button" class="pkey" data-key="9">9</button>
+    <button type="button" class="pkey word" data-key="clear">Clear</button>
+    <button type="button" class="pkey" data-key="0">0</button>
+    <button type="button" class="pkey word" data-key="back" aria-label="Delete last digit">⌫</button>
+  </div>
+</section>
+
+
+<header class="top" id="head">
+  <div class="eyebrow"><i aria-hidden="true"></i>LS · Sales<span class="me" id="whoName"></span><a class="lockbtn homelink" href="index.html">Home</a><button type="button" class="lockbtn" id="lockBtn">Lock</button></div>
+  <div>
+    <h1>Sales entry</h1>
+    <p class="ta-sub" lang="ta">விற்பனை பதிவு</p>
+  </div>
+  <label class="date"><span class="sr">Date</span><input id="day" type="date"></label>
+</header>
+
+<div class="tabs" id="tabs" role="tablist" aria-label="Session">
+  <button type="button" class="tab" role="tab" data-s="morning" aria-selected="true"><b>Morning</b><small id="t-morning">₹0</small></button>
+  <button type="button" class="tab" role="tab" data-s="lunch" aria-selected="false"><b>Lunch</b><small id="t-lunch">₹0</small></button>
+  <button type="button" class="tab" role="tab" data-s="dinner" aria-selected="false"><b>Dinner</b><small id="t-dinner">₹0</small></button>
+</div>
+
+<div class="list" id="list" role="tabpanel" aria-label="Sales figures"></div>
+
+<div class="bottom" id="bottom">
+  <div class="sum" aria-live="polite">
+    <span>Day sales <b id="daySales">₹0</b></span>
+    <span class="ub" id="dayUbWrap">Unbilled <b id="dayUb">₹0</b></span>
+  </div>
+  <div class="pad" id="pad">
+    <button type="button" class="key" style="grid-area:k1" data-k="1">1</button>
+    <button type="button" class="key" style="grid-area:k2" data-k="2">2</button>
+    <button type="button" class="key" style="grid-area:k3" data-k="3">3</button>
+    <button type="button" class="key fn" style="grid-area:del" data-k="del" aria-label="Delete last digit">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11v12H9l-6-6 6-6z"></path><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"></path></svg>
+    </button>
+    <button type="button" class="key" style="grid-area:k4" data-k="4">4</button>
+    <button type="button" class="key" style="grid-area:k5" data-k="5">5</button>
+    <button type="button" class="key" style="grid-area:k6" data-k="6">6</button>
+    <button type="button" class="key fn next" style="grid-area:nxt" data-k="next" aria-label="Next field">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M6 13l6 6 6-6"></path></svg>
+      Next
+    </button>
+    <button type="button" class="key" style="grid-area:k7" data-k="7">7</button>
+    <button type="button" class="key" style="grid-area:k8" data-k="8">8</button>
+    <button type="button" class="key" style="grid-area:k9" data-k="9">9</button>
+    <button type="button" class="key" style="grid-area:k0" data-k="0">0</button>
+    <button type="button" class="key" style="grid-area:k00" data-k="00">00</button>
+  </div>
+  <p class="save-err" id="saveErr" role="alert"></p>
+  <button type="button" class="save" id="saveBtn"><span id="saveText">Save sales</span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+  </button>
+</div>
+
+<section class="done" id="done" hidden aria-labelledby="doneTitle">
+  <div class="done-head">
+    <div class="tick" aria-hidden="true">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <h2 id="doneTitle" tabindex="-1">Sales saved</h2>
+    <p class="ta-sub" lang="ta">சேமிக்கப்பட்டது</p>
+  </div>
+  <div class="card">
+    <div class="c-row" style="border-top:0"><span class="k">Date</span><span class="num" id="dDate"></span></div>
+    <div class="c-row"><span class="k">Day sales</span><span class="num" id="dSales" style="font-weight:700;font-size:18px"></span></div>
+    <div class="c-row"><span class="k">UPI</span><span class="num" id="dUpi"></span></div>
+    <div class="c-row"><span class="k">Unbilled</span><span class="num" id="dUb"></span></div>
+  </div>
+  <div id="dSessions" style="display:flex;flex-direction:column;gap:14px"></div>
+  <button type="button" class="btn" id="editBtn">Edit</button>
+</section>
+
+<p class="sr" id="live" aria-live="polite"></p>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LINK';   // set in config.js
+</script>
+<script>
+/* ---------- PIN, login from the home screen, and the link to the sheet ---------- */
+// The home screen (index.html) keeps the PIN for this browser tab only, so this page opens without asking again.
+// It is cleared by Lock, by closing the tab, or after 12 hours.
+var LS = (function () {
+  var API_READY = /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(API_URL);
+  var SESSION_KEY = 'ls-session', SESSION_HOURS = 12, PIN_LENGTH = 6;
+  var app = document.querySelector('.app');
+  var pinView = document.getElementById('pinView');
+  var pin = '', typed = '', busy = false, cfg = null;
+  function el(id) { return document.getElementById(id); }
+  try { localStorage.removeItem('ls-coconut-pin'); localStorage.removeItem('ls-owner-pin'); } catch (e) {}
+
+  function readSession() {
+    try {
+      var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.pin && s.until > Date.now()) return s;
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+    return null;
+  }
+  function writeSession(p, who) {
+    try {
+      var old = readSession(), same = old && old.pin === p;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        pin: p, name: who.name, role: who.role,
+        pages: same ? (old.pages || []) : [],
+        until: same ? old.until : Date.now() + SESSION_HOURS * 3600 * 1000
+      }));
+    } catch (e) {}
+  }
+  function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {} }
+
+  // Sends a request to the Apps Script and returns its data. No Google sign-in is sent.
+  async function call(action, payload) {
+    var body = Object.assign({ action: action, pin: pin }, payload || {});
+    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link in config.js.');
+    var res;
+    try {
+      var r = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body),
+        credentials: 'omit',
+        redirect: 'follow'
+      });
+      res = await r.json();
+    } catch (e) {
+      throw new Error('Could not reach the sheet. Check the internet and try again.');
+    }
+    if (!res || res.ok !== true) throw new Error((res && res.error) || 'Something went wrong. Try again.');
+    return res.data;
+  }
+  function errText(err) {
+    var m = (err && err.message) ? err.message : String(err || '');
+    return m.replace(/^(Exception|Error):\s*/i, '') || 'Something went wrong. Try again.';
+  }
+  function isPinError(err) { return /PIN/.test(errText(err)); }
+
+  function setMsg(t, bad) { var m = el('pinMsg'); m.textContent = t; m.classList.toggle('bad', !!bad); }
+  function renderDots() { pinView.querySelectorAll('.dot').forEach(function (d, i) { d.classList.toggle('on', i < typed.length); }); }
+  function setKeys(on) { pinView.querySelectorAll('.pkey').forEach(function (k) { k.disabled = !on; }); }
+  function shake() { var d = el('dots'); d.classList.remove('wrong'); void d.offsetWidth; d.classList.add('wrong'); }
+
+  function press(k) {
+    if (busy) return;
+    if (k === 'back') typed = typed.slice(0, -1);
+    else if (k === 'clear') typed = '';
+    else if (typed.length < PIN_LENGTH) typed += k;
+    el('dots').classList.remove('wrong');
+    setMsg('');
+    renderDots();
+    if (typed.length === PIN_LENGTH) tryPin(typed);
+  }
+
+  async function tryPin(p, quiet) {
+    busy = true; setKeys(false); setMsg(quiet ? 'Opening…' : 'Checking…');
+    try {
+      var me = await call('login', { pin: p, page: cfg.page });
+      pin = p;
+      writeSession(p, me);
+      typed = ''; renderDots(); setMsg('');
+      el('whoName').textContent = me.name || '';
+      app.classList.remove('pin-on');
+      window.scrollTo(0, 0);
+      if (cfg.onLogin) cfg.onLogin(me);
+    } catch (err) {
+      typed = ''; renderDots();
+      if (!quiet) shake();
+      if (/Wrong PIN/.test(errText(err))) clearSession();
+      setMsg(errText(err), true);
+    } finally {
+      busy = false; setKeys(true);
+    }
+  }
+
+  function lockOut(message) {
+    pin = ''; typed = ''; renderDots();
+    app.classList.add('pin-on');
+    setMsg(message || '', true);
+    window.scrollTo(0, 0);
+  }
+  // Call from a page's catch: returns true when the error was about the PIN and the PIN screen is shown.
+  function handle(err) {
+    if (!isPinError(err)) return false;
+    if (/Wrong PIN/.test(errText(err))) clearSession();
+    lockOut(errText(err));
+    return true;
+  }
+
+  pinView.querySelectorAll('.pkey').forEach(function (b) { b.addEventListener('click', function () { press(b.dataset.key); }); });
+  document.addEventListener('keydown', function (e) {
+    if (!app.classList.contains('pin-on')) return;
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    else if (e.key === 'Backspace') press('back');
+    else if (e.key === 'Escape') press('clear');
+  });
+  el('lockBtn').addEventListener('click', function () { clearSession(); window.location.href = 'index.html'; });
+
+  function start(c) {
+    cfg = c;
+    if (!API_READY) { setKeys(false); setMsg('This page is not connected yet: add the Apps Script link in config.js.', true); return; }
+    var s = readSession();
+    if (s) tryPin(s.pin, true);
+  }
+
+  return { start: start, call: call, errText: errText, handle: handle, locked: function () { return app.classList.contains('pin-on'); } };
+})();
+
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  var SESSIONS = [
+    { k: 'morning', en: 'Morning', ta: 'காலை' },
+    { k: 'lunch', en: 'Lunch', ta: 'மதியம்' },
+    { k: 'dinner', en: 'Dinner', ta: 'இரவு' }
+  ];
+  var FIELDS = [
+    { k: 'lineAmt', en: 'Line bill amount', ta: 'லைன் பில் தொகை', money: true },
+    { k: 'parcelAmt', en: 'Parcel bill amount', ta: 'பார்சல் பில் தொகை', money: true },
+    { k: 'lineCnt', en: 'Line bills', ta: 'லைன் பில்கள்' },
+    { k: 'parcelCnt', en: 'Parcel bills', ta: 'பார்சல் பில்கள்' },
+    { k: 'orders', en: 'Number of orders', ta: 'ஆர்டர்கள்' },
+    { k: 'orderAmt', en: 'Order amount', ta: 'ஆர்டர் தொகை', money: true },
+    { k: 'note', en: 'Note amount', ta: 'நோட் தொகை', money: true },
+    { k: 'upi', en: 'UPI amount', ta: 'UPI தொகை', money: true }
+  ];
+  var data = {};
+  var cur = 'morning';
+  var sel = 0;
+  var fresh = true;
+  var loading = false, saving = false, ready = false;
+  var loadSeq = 0;
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  var now = new Date();
+  var todayStr = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
+  $('day').max = todayStr;
+  $('day').value = todayStr;
+
+  function inr(n) { return Number(n || 0).toLocaleString('en-IN'); }
+  function money(n) { return (n < 0 ? '−₹' : '₹') + inr(Math.abs(n)); }
+  function fmtDate(v) {
+    try { return new Date(v + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch (e) { return v; }
+  }
+  function n(s, f) { return Number(data[s][f] || 0); }
+  function billed(s) { return n(s, 'lineAmt') + n(s, 'parcelAmt'); }
+  function unbilled(s) { return n(s, 'note') - billed(s); }
+  function ubClass(v) { return v > 0 ? 'pos' : (v < 0 ? 'neg' : 'zero'); }
+
+  function resetAll(saved) {
+    SESSIONS.forEach(function (s) {
+      data[s.k] = {};
+      FIELDS.forEach(function (f) {
+        var v = saved && saved[s.k] ? Number(saved[s.k][f.k]) || 0 : 0;
+        data[s.k][f.k] = v ? String(v) : '';
+      });
+    });
+    cur = 'morning'; sel = 0; fresh = true;
+  }
+
+  /* ---------- list for the current session ---------- */
+  var lockSvg = '<svg class="lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>';
+  function buildList() {
+    var html = FIELDS.map(function (f, i) {
+      return '<button type="button" class="row" data-i="' + i + '" aria-pressed="false">' +
+        '<span class="lab"><b>' + f.en + '</b><small lang="ta">' + f.ta + '</small></span>' +
+        '<span class="val"></span></button>';
+    }).join('');
+    html += '<div class="ro" id="ubRow"><span class="lab"><b>Unbilled</b><small lang="ta">பில் போடாதது</small></span>' +
+      '<span class="right"><span class="val" id="ubVal"></span>' + lockSvg + '</span></div>';
+    $('list').innerHTML = html;
+  }
+  function message(t) {
+    $('list').innerHTML = '<div class="ro"><span class="lab"><b style="color:var(--dim);font-weight:500">' + t.replace(/[&<>]/g, '') + '</b></span></div>';
+  }
+  function paint() {
+    $('saveBtn').disabled = saving || loading || !ready;
+    if (!ready) return;
+    var rows = $('list').querySelectorAll('.row');
+    FIELDS.forEach(function (f, i) {
+      var raw = data[cur][f.k];
+      var el = rows[i];
+      var isSel = i === sel;
+      el.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+      var shown = raw === '' ? (f.money ? '₹0' : '0') : (f.money ? '₹' + inr(raw) : inr(raw));
+      el.setAttribute('aria-label', f.en + ', ' + shown);
+      var v = el.querySelector('.val');
+      v.classList.toggle('empty', raw === '');
+      v.innerHTML = shown + (isSel ? '<span class="caret" aria-hidden="true"></span>' : '');
+    });
+    var ub = unbilled(cur);
+    var ubv = $('ubVal');
+    ubv.textContent = money(ub);
+    ubv.className = 'val ' + ubClass(ub);
+
+    var daySales = 0, dayUb = 0;
+    SESSIONS.forEach(function (s) {
+      daySales += billed(s.k);
+      dayUb += unbilled(s.k);
+      $('t-' + s.k).textContent = '₹' + inr(billed(s.k));
+    });
+    $('daySales').textContent = '₹' + inr(daySales);
+    $('dayUb').textContent = money(dayUb);
+    $('dayUbWrap').classList.toggle('pos', dayUb > 0);
+    $('saveText').textContent = saving ? 'Saving…' : 'Save sales · ₹' + inr(daySales);
+    $('tabs').querySelectorAll('.tab').forEach(function (t) {
+      t.setAttribute('aria-selected', t.getAttribute('data-s') === cur ? 'true' : 'false');
+    });
+  }
+  function select(i, scroll) {
+    if (!ready) return;
+    sel = i;
+    fresh = true;
+    paint();
+    if (scroll) {
+      var el = $('list').querySelectorAll('.row')[sel];
+      try { el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
+    }
+  }
+  function goSession(k, i) {
+    cur = k;
+    $('list').scrollTop = 0;
+    select(i || 0, false);
+  }
+  $('list').addEventListener('click', function (e) {
+    var b = e.target.closest('.row');
+    if (b) select(Number(b.getAttribute('data-i')), false);
+  });
+  $('tabs').addEventListener('click', function (e) {
+    var t = e.target.closest('.tab');
+    if (t) goSession(t.getAttribute('data-s'), 0);
+  });
+
+  /* ---------- keypad ---------- */
+  function next() {
+    if (sel + 1 < FIELDS.length) { select(sel + 1, true); return; }
+    var idx = SESSIONS.map(function (s) { return s.k; }).indexOf(cur);
+    goSession(SESSIONS[(idx + 1) % SESSIONS.length].k, 0);
+  }
+  function press(k) {
+    if (!ready || saving) return;
+    var f = FIELDS[sel];
+    var v = data[cur][f.k];
+    if (k === 'next') { next(); return; }
+    if (k === 'del') {
+      data[cur][f.k] = fresh ? '' : v.slice(0, -1);
+      fresh = false;
+      paint();
+      return;
+    }
+    var nv = ((fresh ? '' : v) + k).replace(/^0+(?=\d)/, '');
+    if (nv.length > (f.money ? 7 : 4)) return;
+    data[cur][f.k] = nv;
+    fresh = false;
+    paint();
+  }
+  $('pad').addEventListener('click', function (e) {
+    var b = e.target.closest('.key');
+    if (b) press(b.getAttribute('data-k'));
+  });
+  document.addEventListener('keydown', function (e) {
+    if (LS.locked() || !$('done').hidden || e.target.tagName === 'INPUT') return;
+    if (/^[0-9]$/.test(e.key)) { press(e.key); e.preventDefault(); }
+    else if (e.key === 'Backspace') { press('del'); e.preventDefault(); }
+    else if (e.key === 'Enter' || e.key === 'ArrowDown') { press('next'); e.preventDefault(); }
+    else if (e.key === 'ArrowUp' && sel > 0) { select(sel - 1, true); e.preventDefault(); }
+  });
+
+  /* ---------- load the date from the sheet ---------- */
+  async function load() {
+    var day = $('day').value;
+    $('saveErr').textContent = '';
+    if (!day || day > todayStr) { ready = false; message('Pick a date that is not in the future'); paint(); return; }
+    var seq = ++loadSeq;
+    loading = true; ready = false;
+    message('Loading…');
+    paint();
+    try {
+      var res = await LS.call('getSales', { date: day });
+      if (seq !== loadSeq) return;
+      resetAll(res.sessions);
+      buildList();
+      ready = true;
+    } catch (err) {
+      if (seq !== loadSeq) return;
+      if (LS.handle(err)) return;
+      message(LS.errText(err));
+    } finally {
+      if (seq === loadSeq) { loading = false; paint(); }
+    }
+  }
+  $('day').addEventListener('change', load);
+
+  /* ---------- save ---------- */
+  $('saveBtn').addEventListener('click', async function () {
+    if (saving || loading || !ready) return;
+    var day = $('day').value;
+    if (!day || day > todayStr) { $('day').focus(); $('live').textContent = 'Pick a date that is not in the future'; return; }
+    saving = true; $('saveErr').textContent = ''; paint();
+    try {
+      var res = await LS.call('saveSales', { date: day, sessions: data });
+      var html = SESSIONS.map(function (s) {
+        var b = billed(s.k), ub = unbilled(s.k);
+        var r = function (k, v, cls) { return '<div class="c-row"><span class="k">' + k + '</span><span class="num' + (cls ? ' ' + cls : '') + '">' + v + '</span></div>'; };
+        return '<div class="card"><h3>' + s.en + ' <span>₹' + inr(b) + '</span></h3>' +
+          r('Line bills', '₹' + inr(n(s.k, 'lineAmt')) + ' · ' + inr(n(s.k, 'lineCnt'))) +
+          r('Parcel bills', '₹' + inr(n(s.k, 'parcelAmt')) + ' · ' + inr(n(s.k, 'parcelCnt'))) +
+          r('Orders', inr(n(s.k, 'orders'))) +
+          r('Order amount', '₹' + inr(n(s.k, 'orderAmt'))) +
+          r('Note amount', '₹' + inr(n(s.k, 'note'))) +
+          r('UPI amount', '₹' + inr(n(s.k, 'upi'))) +
+          r('Unbilled', money(ub), ub > 0 ? 'pos' : (ub < 0 ? 'neg' : '')) +
+          '</div>';
+      }).join('');
+      var dayUb = res.dayUnbilled;
+      $('dDate').textContent = fmtDate(res.date);
+      $('dSales').textContent = '₹' + inr(res.daySales);
+      $('dUpi').textContent = '₹' + inr(res.dayUpi);
+      var du = $('dUb');
+      du.textContent = money(dayUb);
+      du.className = 'num' + (dayUb > 0 ? ' pos' : (dayUb < 0 ? ' neg' : ''));
+      du.style.fontWeight = '700';
+      du.style.color = dayUb > 0 ? 'var(--coral)' : (dayUb < 0 ? 'var(--gold)' : '');
+      $('dSessions').innerHTML = html;
+      ['head', 'tabs', 'list', 'bottom'].forEach(function (id) { $(id).hidden = true; });
+      $('done').hidden = false;
+      $('doneTitle').focus();
+    } catch (err) {
+      if (LS.handle(err)) return;
+      $('saveErr').textContent = LS.errText(err);
+    } finally {
+      saving = false; paint();
+    }
+  });
+  $('editBtn').addEventListener('click', function () {
+    $('done').hidden = true;
+    ['head', 'tabs', 'list', 'bottom'].forEach(function (id) { $(id).hidden = false; });
+    select(sel, true);
+  });
+
+  resetAll(null);
+  paint();
+  LS.start({ page: 'sales', onLogin: load });
+})();
+</script>
+</body>
+</html>

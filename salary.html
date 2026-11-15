@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#15130F">
+<title>LS — Salary entry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#15130F; --surface:#201D18; --surface2:#2A261F; --line:#3A342B;
+  --text:#F4EFE6; --dim:#B5AC9C; --faint:#9C9384;
+  --gold:#F2B33D; --ink:#1F1606; --mint:#6FD3A4; --coral:#FF8F73;
+  --num:'Space Grotesk','Hind Madurai',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+html{background:#0E0C09}
+body{margin:0;color:var(--text);font-family:'Hind Madurai',system-ui,sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.app{max-width:480px;margin:0 auto;height:100vh;height:100dvh;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:640px){
+  .app{margin:24px auto;height:min(880px,calc(100vh - 48px));border-radius:32px;box-shadow:0 0 0 1px #2A261F,0 30px 80px rgba(0,0,0,.5)}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+
+/* header */
+.top{flex:none;padding:20px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--dim);margin-bottom:4px}
+.eyebrow i{width:8px;height:8px;border-radius:99px;background:var(--gold)}
+h1{margin:0;font-family:var(--num);font-size:26px;font-weight:600;line-height:1.1}
+.ta-sub{margin:0;font-size:15px;color:var(--dim)}
+.date{display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:12px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line)}
+.date:focus-within{box-shadow:inset 0 0 0 2px var(--gold)}
+.date input{border:0;outline:0;background:transparent;color:var(--text);font-family:var(--num);font-size:15px;padding:8px 0;min-height:40px}
+.date input::-webkit-calendar-picker-indicator{filter:invert(.8);cursor:pointer}
+
+/* staff list (top half, scrolls) */
+.list{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 16px 8px;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:58px;padding:8px 16px;border:0;border-radius:14px;background:var(--surface);color:var(--text);font:inherit;text-align:left;cursor:pointer;flex:none}
+.row:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.row[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--gold);background:#2A2416}
+.who{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.who b{font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who small{font-size:13px;color:var(--dim)}
+.amt{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:20px;font-weight:600;white-space:nowrap}
+.row.changed .amt{color:var(--gold)}
+.row.off .who b{color:var(--faint)}
+.off-pill{font-family:'Hind Madurai',system-ui,sans-serif;font-size:14px;font-weight:700;color:var(--coral);border:1.5px solid var(--coral);border-radius:99px;padding:2px 12px}
+.caret{display:inline-block;width:2px;height:20px;margin-left:2px;background:var(--gold);vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* summary + keypad (bottom half, fixed) */
+.bottom{flex:none;border-top:1px solid var(--surface2);background:var(--bg);padding:10px 16px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+.sum{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 4px}
+.sum .counts{font-size:14px;color:var(--dim)}
+.sum .counts b{color:var(--text);font-weight:600}
+.sum .counts .o{color:var(--coral);font-weight:600}
+.sum .total{font-family:var(--num);font-size:22px;font-weight:600}
+.pad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-areas:"k1 k2 k3 del" "k4 k5 k6 rst" "k7 k8 k9 nxt" "k0 k0 k00 nxt";gap:8px}
+.key{min-height:52px;border:0;border-radius:14px;background:var(--surface2);color:var(--text);font-family:var(--num);font-size:24px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.key:active{background:var(--line)}
+.key:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.key.fn{font-family:'Hind Madurai',system-ui,sans-serif;font-size:15px;font-weight:600;color:var(--dim)}
+.key.next{background:var(--surface);color:var(--gold);box-shadow:inset 0 0 0 1.5px var(--gold);flex-direction:column;gap:2px}
+.save{min-height:56px;border:0;border-radius:16px;background:var(--gold);color:var(--ink);font:inherit;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.save:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.save:active{transform:translateY(1px)}
+
+/* saved view */
+.done{flex:1;min-height:0;overflow-y:auto;padding:32px 20px 20px;display:flex;flex-direction:column;gap:16px}
+.done-head{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.tick{width:96px;height:96px;border-radius:99px;background:#1C3329;box-shadow:0 0 0 10px rgba(111,211,164,.08);color:var(--mint);display:flex;align-items:center;justify-content:center;animation:pop .5s ease-out both}
+.tick path{stroke-dasharray:24;animation:draw .45s .3s ease-out both}
+.done h2{margin:0;font-family:var(--num);font-size:26px;font-weight:600;outline:none}
+.card{background:var(--surface);border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;animation:rise .4s .3s ease-out both}
+.c-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-top:1px solid var(--surface2);font-size:16px}
+.c-row:first-child{border-top:0}
+.c-row .k{font-size:14px;color:var(--dim)}
+.c-row.big{font-size:22px;font-weight:700}
+.c-list .c-row{font-size:15px;padding:8px 0}
+.c-list .off{color:var(--coral);font-weight:600}
+.btn{display:flex;align-items:center;justify-content:center;min-height:56px;border:0;border-radius:16px;background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line);font:inherit;font-size:17px;font-weight:700;cursor:pointer}
+.btn:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+@keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* PIN screen, Home / Lock */
+.app.pin-on > :not(#pinView):not(.sr){display:none !important}
+.app:not(.pin-on) > #pinView{display:none !important}
+.pin{padding:28px 20px 28px;display:flex;flex-direction:column;gap:22px;flex:1;overflow-y:auto}
+.pin-top{display:flex;flex-direction:column;gap:2px}
+.pin-top h1{font-size:30px}
+.pin-top .ta-sub{font-size:17px}
+.dots{display:flex;gap:14px;justify-content:center;margin-top:10px}
+.dot{width:16px;height:16px;border-radius:99px;border:2px solid var(--faint);background:transparent}
+.dot.on{background:var(--gold);border-color:var(--gold)}
+.dots.wrong .dot{border-color:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .dots.wrong{animation:shake .35s ease-in-out}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+}
+.pin-msg{margin:0;min-height:1.45em;text-align:center;font-size:15px;color:var(--dim)}
+.pin-msg.bad{color:var(--coral);font-weight:600}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:auto}
+.pkey{height:64px;border:0;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);color:var(--text);font-family:var(--num);font-size:26px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.pkey.word{font-family:inherit;font-size:16px}
+.pkey:active{background:var(--surface2)}
+.pkey:disabled{opacity:.5;cursor:default}
+.pkey:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.me{margin-left:auto;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.me + .lockbtn{margin-left:10px}
+.lockbtn + .lockbtn{margin-left:0}
+a.lockbtn{display:inline-flex;align-items:center;text-decoration:none}
+.lockbtn{flex:none;margin-left:auto;height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.save-err{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--coral)}
+.save-err:empty{display:none}
+.btn:disabled,.save:disabled{opacity:.6;cursor:progress}
+.top{flex-wrap:wrap}
+.top > .eyebrow{flex:1 0 100%;margin-bottom:0}
+</style>
+</head>
+<body>
+<div class="app pin-on">
+
+<section class="pin" id="pinView" aria-labelledby="pinTitle">
+  <header class="pin-top">
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Salary<a class="lockbtn homelink" href="index.html">Home</a></div>
+    <h1 id="pinTitle">Enter your PIN</h1>
+    <p class="ta-sub" lang="ta">உங்கள் PIN எண்</p>
+  </header>
+  <div class="dots" id="dots" aria-hidden="true">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <p class="pin-msg" id="pinMsg" role="status" aria-live="polite"></p>
+  <div class="keypad">
+    <button type="button" class="pkey" data-key="1">1</button>
+    <button type="button" class="pkey" data-key="2">2</button>
+    <button type="button" class="pkey" data-key="3">3</button>
+    <button type="button" class="pkey" data-key="4">4</button>
+    <button type="button" class="pkey" data-key="5">5</button>
+    <button type="button" class="pkey" data-key="6">6</button>
+    <button type="button" class="pkey" data-key="7">7</button>
+    <button type="button" class="pkey" data-key="8">8</button>
+    <button type="button" class="pkey" data-key="9">9</button>
+    <button type="button" class="pkey word" data-key="clear">Clear</button>
+    <button type="button" class="pkey" data-key="0">0</button>
+    <button type="button" class="pkey word" data-key="back" aria-label="Delete last digit">⌫</button>
+  </div>
+</section>
+
+
+<header class="top" id="head">
+  <div class="eyebrow"><i aria-hidden="true"></i>LS · Salary<span class="me" id="whoName"></span><a class="lockbtn homelink" href="index.html">Home</a><button type="button" class="lockbtn" id="lockBtn">Lock</button></div>
+  <div>
+    <h1>Salary entry</h1>
+    <p class="ta-sub" lang="ta">சம்பளம் பதிவு</p>
+  </div>
+  <label class="date"><span class="sr">Date</span><input id="day" type="date"></label>
+</header>
+
+<div class="list" id="list" role="group" aria-label="Staff and daily salary"></div>
+
+<div class="bottom" id="bottom">
+  <div class="sum" aria-live="polite">
+    <span class="counts"><b id="cWork">0</b> working · <span class="o" id="cOff">0</span> off</span>
+    <span class="total"><span id="total">₹0</span> <span style="font-family:'Hind Madurai',system-ui,sans-serif;font-size:14px;font-weight:600;color:var(--dim)">Cash</span></span>
+  </div>
+  <div class="pad" id="pad">
+    <button type="button" class="key" style="grid-area:k1" data-k="1">1</button>
+    <button type="button" class="key" style="grid-area:k2" data-k="2">2</button>
+    <button type="button" class="key" style="grid-area:k3" data-k="3">3</button>
+    <button type="button" class="key fn" style="grid-area:del" data-k="del" aria-label="Delete last digit">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11v12H9l-6-6 6-6z"></path><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"></path></svg>
+    </button>
+    <button type="button" class="key" style="grid-area:k4" data-k="4">4</button>
+    <button type="button" class="key" style="grid-area:k5" data-k="5">5</button>
+    <button type="button" class="key" style="grid-area:k6" data-k="6">6</button>
+    <button type="button" class="key fn" style="grid-area:rst" data-k="reset" aria-label="Back to fixed salary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"></path><path d="M4 4v4.5h4.5"></path></svg>
+      Fixed
+    </button>
+    <button type="button" class="key" style="grid-area:k7" data-k="7">7</button>
+    <button type="button" class="key" style="grid-area:k8" data-k="8">8</button>
+    <button type="button" class="key" style="grid-area:k9" data-k="9">9</button>
+    <button type="button" class="key fn next" style="grid-area:nxt" data-k="next" aria-label="Next staff">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M6 13l6 6 6-6"></path></svg>
+      Next
+    </button>
+    <button type="button" class="key" style="grid-area:k0" data-k="0">0</button>
+    <button type="button" class="key" style="grid-area:k00" data-k="00">00</button>
+  </div>
+  <p class="save-err" id="saveErr" role="alert"></p>
+  <button type="button" class="save" id="saveBtn"><span id="saveText">Save salary</span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+  </button>
+</div>
+
+<section class="done" id="done" hidden aria-labelledby="doneTitle">
+  <div class="done-head">
+    <div class="tick" aria-hidden="true">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <h2 id="doneTitle" tabindex="-1">Salary saved</h2>
+    <p class="ta-sub" lang="ta">சேமிக்கப்பட்டது</p>
+  </div>
+  <div class="card">
+    <div class="c-row"><span class="k">Date</span><span class="num" id="dDate"></span></div>
+    <div class="c-row"><span class="k">Working · Off</span><span class="num" id="dCounts"></span></div>
+    <div class="c-row big"><span class="k">Total</span><span class="num" id="dTotal"></span></div>
+    <div class="c-row"><span class="k">Paid by</span><span>Cash</span></div>
+  </div>
+  <div class="card c-list" id="dList"></div>
+  <button type="button" class="btn" id="editBtn">Edit</button>
+</section>
+
+<p class="sr" id="live" aria-live="polite"></p>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LINK';   // set in config.js
+</script>
+<script>
+/* ---------- PIN, login from the home screen, and the link to the sheet ---------- */
+// The home screen (index.html) keeps the PIN for this browser tab only, so this page opens without asking again.
+// It is cleared by Lock, by closing the tab, or after 12 hours.
+var LS = (function () {
+  var API_READY = /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(API_URL);
+  var SESSION_KEY = 'ls-session', SESSION_HOURS = 12, PIN_LENGTH = 6;
+  var app = document.querySelector('.app');
+  var pinView = document.getElementById('pinView');
+  var pin = '', typed = '', busy = false, cfg = null;
+  function el(id) { return document.getElementById(id); }
+  try { localStorage.removeItem('ls-coconut-pin'); localStorage.removeItem('ls-owner-pin'); } catch (e) {}
+
+  function readSession() {
+    try {
+      var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.pin && s.until > Date.now()) return s;
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+    return null;
+  }
+  function writeSession(p, who) {
+    try {
+      var old = readSession(), same = old && old.pin === p;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        pin: p, name: who.name, role: who.role,
+        pages: same ? (old.pages || []) : [],
+        until: same ? old.until : Date.now() + SESSION_HOURS * 3600 * 1000
+      }));
+    } catch (e) {}
+  }
+  function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {} }
+
+  // Sends a request to the Apps Script and returns its data. No Google sign-in is sent.
+  async function call(action, payload) {
+    var body = Object.assign({ action: action, pin: pin }, payload || {});
+    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link in config.js.');
+    var res;
+    try {
+      var r = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body),
+        credentials: 'omit',
+        redirect: 'follow'
+      });
+      res = await r.json();
+    } catch (e) {
+      throw new Error('Could not reach the sheet. Check the internet and try again.');
+    }
+    if (!res || res.ok !== true) throw new Error((res && res.error) || 'Something went wrong. Try again.');
+    return res.data;
+  }
+  function errText(err) {
+    var m = (err && err.message) ? err.message : String(err || '');
+    return m.replace(/^(Exception|Error):\s*/i, '') || 'Something went wrong. Try again.';
+  }
+  function isPinError(err) { return /PIN/.test(errText(err)); }
+
+  function setMsg(t, bad) { var m = el('pinMsg'); m.textContent = t; m.classList.toggle('bad', !!bad); }
+  function renderDots() { pinView.querySelectorAll('.dot').forEach(function (d, i) { d.classList.toggle('on', i < typed.length); }); }
+  function setKeys(on) { pinView.querySelectorAll('.pkey').forEach(function (k) { k.disabled = !on; }); }
+  function shake() { var d = el('dots'); d.classList.remove('wrong'); void d.offsetWidth; d.classList.add('wrong'); }
+
+  function press(k) {
+    if (busy) return;
+    if (k === 'back') typed = typed.slice(0, -1);
+    else if (k === 'clear') typed = '';
+    else if (typed.length < PIN_LENGTH) typed += k;
+    el('dots').classList.remove('wrong');
+    setMsg('');
+    renderDots();
+    if (typed.length === PIN_LENGTH) tryPin(typed);
+  }
+
+  async function tryPin(p, quiet) {
+    busy = true; setKeys(false); setMsg(quiet ? 'Opening…' : 'Checking…');
+    try {
+      var me = await call('login', { pin: p, page: cfg.page });
+      pin = p;
+      writeSession(p, me);
+      typed = ''; renderDots(); setMsg('');
+      el('whoName').textContent = me.name || '';
+      app.classList.remove('pin-on');
+      window.scrollTo(0, 0);
+      if (cfg.onLogin) cfg.onLogin(me);
+    } catch (err) {
+      typed = ''; renderDots();
+      if (!quiet) shake();
+      if (/Wrong PIN/.test(errText(err))) clearSession();
+      setMsg(errText(err), true);
+    } finally {
+      busy = false; setKeys(true);
+    }
+  }
+
+  function lockOut(message) {
+    pin = ''; typed = ''; renderDots();
+    app.classList.add('pin-on');
+    setMsg(message || '', true);
+    window.scrollTo(0, 0);
+  }
+  // Call from a page's catch: returns true when the error was about the PIN and the PIN screen is shown.
+  function handle(err) {
+    if (!isPinError(err)) return false;
+    if (/Wrong PIN/.test(errText(err))) clearSession();
+    lockOut(errText(err));
+    return true;
+  }
+
+  pinView.querySelectorAll('.pkey').forEach(function (b) { b.addEventListener('click', function () { press(b.dataset.key); }); });
+  document.addEventListener('keydown', function (e) {
+    if (!app.classList.contains('pin-on')) return;
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    else if (e.key === 'Backspace') press('back');
+    else if (e.key === 'Escape') press('clear');
+  });
+  el('lockBtn').addEventListener('click', function () { clearSession(); window.location.href = 'index.html'; });
+
+  function start(c) {
+    cfg = c;
+    if (!API_READY) { setKeys(false); setMsg('This page is not connected yet: add the Apps Script link in config.js.', true); return; }
+    var s = readSession();
+    if (s) tryPin(s.pin, true);
+  }
+
+  return { start: start, call: call, errText: errText, handle: handle, locked: function () { return app.classList.contains('pin-on'); } };
+})();
+
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* Staff with their fixed daily salary, from the sheet */
+  var STAFF = [];
+  var amounts = {};
+  var sel = 0;
+  var fresh = true;
+  var loading = false, saving = false, ready = false;
+  var loadSeq = 0;
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  var now = new Date();
+  var todayStr = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
+  $('day').max = todayStr;
+  $('day').value = todayStr;
+
+  function money(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
+  function fmtDate(v) {
+    try { return new Date(v + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch (e) { return v; }
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function val(i) { var s = amounts[STAFF[i].id]; return s === '' ? 0 : Number(s); }
+
+  /* ---------- list ---------- */
+  function message(t) {
+    $('list').innerHTML = '<div class="row" style="cursor:default"><span class="who"><b style="color:var(--dim);font-weight:500">' + esc(t) + '</b></span></div>';
+  }
+  function buildList() {
+    if (!STAFF.length) { message('No staff'); return; }
+    $('list').innerHTML = STAFF.map(function (s, i) {
+      return '<button type="button" class="row" data-i="' + i + '" aria-pressed="false">' +
+        '<span class="who"><b>' + esc(s.name) + '</b><small>' + esc(s.role || '—') + '</small></span>' +
+        '<span class="amt"></span></button>';
+    }).join('');
+  }
+  function paintRow(i) {
+    var s = STAFF[i];
+    var el = $('list').children[i];
+    var v = val(i);
+    var off = v === 0;
+    var isSel = i === sel;
+    el.classList.toggle('off', off);
+    el.classList.toggle('changed', !off && v !== s.fixed);
+    el.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+    el.setAttribute('aria-label', s.name + ', ' + (s.role || '') + ', ' + (off ? 'off' : money(v)));
+    var amt = el.querySelector('.amt');
+    var caret = isSel ? '<span class="caret" aria-hidden="true"></span>' : '';
+    amt.innerHTML = off ? '<span class="off-pill">Off</span>' + caret : money(v) + caret;
+  }
+  function paintAll() {
+    var total = 0, work = 0, off = 0;
+    if (ready) {
+      STAFF.forEach(function (s, i) { paintRow(i); });
+      STAFF.forEach(function (s, i) { var v = val(i); total += v; if (v > 0) work++; else off++; });
+    }
+    $('cWork').textContent = work;
+    $('cOff').textContent = off;
+    $('total').textContent = money(total);
+    $('saveText').textContent = saving ? 'Saving…' : 'Save salary · ' + money(total);
+    $('saveBtn').disabled = saving || loading || !ready || !STAFF.length;
+  }
+  function select(i, scroll) {
+    if (!ready || !STAFF.length) return;
+    sel = Math.max(0, Math.min(STAFF.length - 1, i));
+    fresh = true;
+    paintAll();
+    if (scroll) {
+      var el = $('list').children[sel];
+      try { el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
+    }
+  }
+  $('list').addEventListener('click', function (e) {
+    var b = e.target.closest('.row');
+    if (b && b.hasAttribute('data-i')) select(Number(b.getAttribute('data-i')), false);
+  });
+
+  /* ---------- keypad ---------- */
+  function press(k) {
+    if (!ready || !STAFF.length || saving) return;
+    var id = STAFF[sel].id;
+    var cur = amounts[id];
+    if (k === 'next') { select(sel + 1 < STAFF.length ? sel + 1 : 0, true); return; }
+    if (k === 'reset') { amounts[id] = String(STAFF[sel].fixed); fresh = true; paintAll(); return; }
+    if (k === 'del') {
+      cur = fresh ? '' : cur.slice(0, -1);
+      amounts[id] = cur;
+      fresh = false;
+      paintAll();
+      return;
+    }
+    var next = (fresh ? '' : cur) + k;
+    next = next.replace(/^0+(?=\d)/, '');
+    if (next.length > 5) return;
+    amounts[id] = next;
+    fresh = false;
+    paintAll();
+  }
+  $('pad').addEventListener('click', function (e) {
+    var b = e.target.closest('.key');
+    if (b) press(b.getAttribute('data-k'));
+  });
+  document.addEventListener('keydown', function (e) {
+    if (LS.locked() || !$('done').hidden || e.target.tagName === 'INPUT') return;
+    if (/^[0-9]$/.test(e.key)) { press(e.key); e.preventDefault(); }
+    else if (e.key === 'Backspace') { press('del'); e.preventDefault(); }
+    else if (e.key === 'Enter' || e.key === 'ArrowDown') { press('next'); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { select(sel - 1, true); e.preventDefault(); }
+  });
+
+  /* ---------- load the date from the sheet ---------- */
+  // Staff come prefilled with their fixed salary; a date that was already saved shows what was saved.
+  async function load() {
+    var day = $('day').value;
+    $('saveErr').textContent = '';
+    if (!day || day > todayStr) { ready = false; message('Pick a date that is not in the future'); paintAll(); return; }
+    var seq = ++loadSeq;
+    loading = true; ready = false;
+    message('Loading…');
+    paintAll();
+    try {
+      var res = await LS.call('getSalary', { date: day });
+      if (seq !== loadSeq) return;
+      STAFF = res.staff || [];
+      amounts = {};
+      STAFF.forEach(function (s) {
+        var saved = res.saved && Object.prototype.hasOwnProperty.call(res.saved, s.id) ? res.saved[s.id] : null;
+        amounts[s.id] = String(saved == null ? s.fixed : saved);
+      });
+      sel = 0; fresh = true; ready = true;
+      buildList();
+    } catch (err) {
+      if (seq !== loadSeq) return;
+      if (LS.handle(err)) return;
+      message(LS.errText(err));
+    } finally {
+      if (seq === loadSeq) { loading = false; paintAll(); }
+    }
+  }
+  $('day').addEventListener('change', load);
+
+  /* ---------- save ---------- */
+  $('saveBtn').addEventListener('click', async function () {
+    if (saving || loading || !ready) return;
+    var day = $('day').value;
+    if (!day || day > todayStr) { $('day').focus(); $('live').textContent = 'Pick a date that is not in the future'; return; }
+    saving = true; $('saveErr').textContent = ''; paintAll();
+    try {
+      var res = await LS.call('saveSalary', { date: day, rows: STAFF.map(function (s, i) { return { staffId: s.id, amount: val(i) }; }) });
+      var rows = STAFF.map(function (s, i) {
+        var v = val(i);
+        return '<div class="c-row"><span>' + esc(s.name) + '</span>' + (v > 0 ? '<span class="num">' + money(v) + '</span>' : '<span class="off">Off</span>') + '</div>';
+      }).join('');
+      $('dDate').textContent = fmtDate(res.date);
+      $('dCounts').textContent = res.working + ' · ' + res.off;
+      $('dTotal').textContent = money(res.total);
+      $('dList').innerHTML = rows;
+      ['head', 'list', 'bottom'].forEach(function (id) { $(id).hidden = true; });
+      $('done').hidden = false;
+      $('doneTitle').focus();
+    } catch (err) {
+      if (LS.handle(err)) return;
+      $('saveErr').textContent = LS.errText(err);
+    } finally {
+      saving = false; paintAll();
+    }
+  });
+  $('editBtn').addEventListener('click', function () {
+    $('done').hidden = true;
+    ['head', 'list', 'bottom'].forEach(function (id) { $(id).hidden = false; });
+    select(sel, true);
+  });
+
+  paintAll();
+  LS.start({ page: 'salary', onLogin: load });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#15130F">
+<title>LS — Payment entry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#15130F; --surface:#201D18; --surface2:#2A261F; --line:#3A342B;
+  --text:#F4EFE6; --dim:#B5AC9C; --faint:#9C9384;
+  --gold:#F2B33D; --ink:#1F1606; --mint:#6FD3A4; --coral:#FF8F73;
+  --num:'Space Grotesk','Hind Madurai',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{background:#0E0C09}
+body{margin:0;color:var(--text);font-family:'Hind Madurai',system-ui,sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);display:flex;flex-direction:column}
+@media (min-width:640px){
+  .app{margin:32px auto;min-height:auto;border-radius:32px;box-shadow:0 0 0 1px #2A261F,0 30px 80px rgba(0,0,0,.5)}
+  .bar{border-radius:0 0 32px 32px}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.top{padding:28px 20px 4px;display:flex;flex-direction:column;gap:2px}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--dim);margin-bottom:6px}
+.eyebrow i{width:8px;height:8px;border-radius:99px;background:var(--gold)}
+h1{margin:0;font-family:var(--num);font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.15}
+.ta-sub{margin:0;font-size:17px;color:var(--dim)}
+
+form{display:flex;flex-direction:column;flex:1}
+main{padding:20px 20px 28px;display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0;margin:0;padding:0;border:0}
+.label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;width:100%;padding:0;font-size:15px;font-weight:600}
+legend.label{margin-bottom:6px}
+.label-ta{font-size:13px;font-weight:500;color:var(--dim)}
+.opt{font-size:12px;font-weight:600;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+.control{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px;border-radius:14px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow .15s}
+.control:focus-within{box-shadow:inset 0 0 0 2px var(--gold)}
+.control input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit;font-size:17px;padding:14px 0;-webkit-appearance:none;appearance:none}
+.control input[type="date"]{min-height:54px}
+.control input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.8);cursor:pointer}
+.control input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none}
+.control > svg.lead{flex:none;color:var(--dim)}
+.prefix{align-self:stretch;display:flex;align-items:center;padding-right:12px;border-right:1px solid var(--line);font-family:var(--num);font-size:17px;color:var(--dim)}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+::placeholder{color:var(--faint);opacity:1}
+.ok{display:none;flex:none;color:var(--mint)}
+.field.valid .ok{display:block}
+.err{display:none;align-items:flex-start;gap:6px;font-size:14px;font-weight:600;color:var(--coral)}
+.err svg{flex:none;margin-top:2px}
+.field.invalid > .control,.field.invalid .picker > .control{box-shadow:inset 0 0 0 2px var(--coral)}
+.field.invalid > .err{display:flex}
+
+/* vendor picker */
+.results{display:flex;flex-direction:column;margin-top:6px;border-radius:14px;background:var(--surface);overflow:hidden}
+.res{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:56px;padding:8px 16px;border:0;border-top:1px solid var(--surface2);background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer;width:100%}
+.res:first-child{border-top:0}
+.res:hover,.res:focus-visible{background:var(--surface2);outline:none}
+.res b{font-size:16px;font-weight:600;display:block}
+.res small{font-size:13px;color:var(--dim)}
+.res .bal{font-family:var(--num);font-size:14px;color:var(--dim);white-space:nowrap}
+.res-none{padding:14px 16px;color:var(--dim);font-size:15px}
+.picked{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:10px 8px 10px 16px;border-radius:14px;background:var(--surface);box-shadow:inset 0 0 0 2px var(--gold)}
+.picked b{display:block;font-size:17px;font-weight:600;line-height:1.25}
+.picked span{font-size:14px;color:var(--dim)}
+.link-btn{min-height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--gold);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.link-btn:focus-visible{outline:2px solid var(--gold)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.choice{display:flex;flex-wrap:wrap;gap:8px}
+.choice label{position:relative;display:flex}
+.choice input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.choice span{display:flex;align-items:center;min-height:44px;padding:0 18px;border-radius:99px;border:1px solid var(--line);font-size:15px;font-weight:600}
+.choice input:checked + span{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.choice input:focus-visible + span{outline:2px solid var(--gold);outline-offset:2px}
+.field.invalid .choice span{border-color:var(--coral)}
+
+/* read-only */
+.ro{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:0 16px;border-radius:14px;background:var(--surface2);color:var(--text)}
+.ro .num{font-size:18px;font-weight:700}
+.ro .arrow{color:var(--dim);font-weight:500}
+.ro .after{color:var(--gold)}
+.ro .adv{color:var(--mint);font-size:15px;font-weight:600}
+.lock{flex:none;color:var(--faint)}
+.locked{border-radius:18px;background:var(--surface2);padding:14px 16px 4px;display:flex;flex-direction:column}
+.locked-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:8px}
+.locked-head h2{margin:0;display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:600}
+.count{font-family:var(--num);font-size:13px;font-weight:600;color:var(--dim);background:var(--surface);border-radius:99px;padding:1px 8px}
+.hrow{display:grid;grid-template-columns:minmax(0,1fr) auto 76px;align-items:center;gap:12px;min-height:44px;border-top:1px solid var(--line);font-size:15px;font-variant-numeric:tabular-nums}
+.hrow .c2{text-align:right;color:var(--dim)}
+.hrow .c3{text-align:right;font-weight:600}
+.hrow.bill{grid-template-columns:minmax(0,1fr) auto 84px;min-height:52px;padding:6px 0}
+.hrow.bill .c2{color:var(--dim);white-space:nowrap}
+.hrow.bill.closed .c2{color:var(--mint)}
+.bc{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.bc small{font-size:13px;color:var(--dim)}
+.hrow.open .c3{color:var(--gold)}
+.hrow.pay .c2{color:var(--text);font-weight:600;text-align:right}
+.hrow.pay .c3{color:var(--dim);font-weight:500}
+.h-none{padding:12px 0;border-top:1px solid var(--line);font-size:15px;color:var(--dim)}
+.more{min-height:44px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--gold);font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-align:left;padding:0}
+.more:focus-visible{outline:2px solid var(--gold)}
+.vendor-only{display:flex;flex-direction:column;gap:18px}
+
+/* bottom bar */
+.bar{position:sticky;bottom:0;margin-top:auto;padding:12px 20px calc(16px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--surface2)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:60px;border:0;border-radius:16px;background:var(--gold);color:var(--ink);font:inherit;font-size:18px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* saved view */
+.done{padding:40px 20px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
+.done-head{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.tick{width:104px;height:104px;border-radius:99px;background:#1C3329;box-shadow:0 0 0 10px rgba(111,211,164,.08);color:var(--mint);display:flex;align-items:center;justify-content:center;animation:pop .5s ease-out both}
+.tick path{stroke-dasharray:24;animation:draw .45s .3s ease-out both}
+.done h2{margin:0;font-family:var(--num);font-size:28px;font-weight:600;outline:none}
+.vcard{background:var(--surface);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;animation:rise .4s .35s ease-out both}
+.v-name{font-family:var(--num);font-size:22px;font-weight:600;line-height:1.2}
+.v-sub{font-size:15px;color:var(--dim);margin-top:-8px}
+.v-rows{display:flex;flex-direction:column}
+.v-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-top:1px solid var(--surface2);font-size:16px}
+.v-row .k{font-size:14px;color:var(--dim)}
+.v-row.big{font-size:20px;font-weight:700}
+.v-row.big .k{font-size:16px;color:var(--text)}
+.v-allocs .alloc{border-top-color:var(--surface2)}
+.actions{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+@keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* PIN screen, Home / Lock */
+.app.pin-on > :not(#pinView):not(.sr){display:none !important}
+.app:not(.pin-on) > #pinView{display:none !important}
+.pin{padding:28px 20px 28px;display:flex;flex-direction:column;gap:22px;flex:1;overflow-y:auto}
+.pin-top{display:flex;flex-direction:column;gap:2px}
+.pin-top h1{font-size:30px}
+.pin-top .ta-sub{font-size:17px}
+.dots{display:flex;gap:14px;justify-content:center;margin-top:10px}
+.dot{width:16px;height:16px;border-radius:99px;border:2px solid var(--faint);background:transparent}
+.dot.on{background:var(--gold);border-color:var(--gold)}
+.dots.wrong .dot{border-color:var(--coral)}
+@media (prefers-reduced-motion:no-preference){
+  .dots.wrong{animation:shake .35s ease-in-out}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+}
+.pin-msg{margin:0;min-height:1.45em;text-align:center;font-size:15px;color:var(--dim)}
+.pin-msg.bad{color:var(--coral);font-weight:600}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:auto}
+.pkey{height:64px;border:0;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);color:var(--text);font-family:var(--num);font-size:26px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.pkey.word{font-family:inherit;font-size:16px}
+.pkey:active{background:var(--surface2)}
+.pkey:disabled{opacity:.5;cursor:default}
+.pkey:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.me{margin-left:auto;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.me + .lockbtn{margin-left:10px}
+.lockbtn + .lockbtn{margin-left:0}
+a.lockbtn{display:inline-flex;align-items:center;text-decoration:none}
+.lockbtn{flex:none;margin-left:auto;height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.lockbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.save-err{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--coral)}
+.save-err:empty{display:none}
+.btn:disabled,.save:disabled{opacity:.6;cursor:progress}
+</style>
+</head>
+<body>
+<div class="app pin-on">
+
+<section class="pin" id="pinView" aria-labelledby="pinTitle">
+  <header class="pin-top">
+    <div class="eyebrow"><i aria-hidden="true"></i>LS · Payments<a class="lockbtn homelink" href="index.html">Home</a></div>
+    <h1 id="pinTitle">Enter your PIN</h1>
+    <p class="ta-sub" lang="ta">உங்கள் PIN எண்</p>
+  </header>
+  <div class="dots" id="dots" aria-hidden="true">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <p class="pin-msg" id="pinMsg" role="status" aria-live="polite"></p>
+  <div class="keypad">
+    <button type="button" class="pkey" data-key="1">1</button>
+    <button type="button" class="pkey" data-key="2">2</button>
+    <button type="button" class="pkey" data-key="3">3</button>
+    <button type="button" class="pkey" data-key="4">4</button>
+    <button type="button" class="pkey" data-key="5">5</button>
+    <button type="button" class="pkey" data-key="6">6</button>
+    <button type="button" class="pkey" data-key="7">7</button>
+    <button type="button" class="pkey" data-key="8">8</button>
+    <button type="button" class="pkey" data-key="9">9</button>
+    <button type="button" class="pkey word" data-key="clear">Clear</button>
+    <button type="button" class="pkey" data-key="0">0</button>
+    <button type="button" class="pkey word" data-key="back" aria-label="Delete last digit">⌫</button>
+  </div>
+</section>
+
+
+<header class="top" id="formHead">
+  <div class="eyebrow"><i aria-hidden="true"></i>LS · Payments<span class="me" id="whoName"></span><a class="lockbtn homelink" href="index.html">Home</a><button type="button" class="lockbtn" id="lockBtn">Lock</button></div>
+  <h1>Payment entry</h1>
+  <p class="ta-sub" lang="ta">பணம் செலுத்துதல்</p>
+</header>
+
+<form id="payForm" novalidate>
+<main>
+
+  <div class="field" data-field="vendor">
+    <label class="label" for="vendorSearch"><span>Vendor</span><span class="label-ta" lang="ta">விற்பனையாளர்</span></label>
+    <div class="picked" id="vendorPicked" hidden>
+      <div><b id="pickedName"></b><span id="pickedMeta" class="num"></span></div>
+      <button type="button" class="link-btn" id="changeVendor">Change</button>
+    </div>
+    <div class="picker" id="vendorPicker">
+      <div class="control">
+        <svg class="lead" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+        <input id="vendorSearch" type="search" autocomplete="off" enterkeyhint="search" placeholder="Search vendor" aria-describedby="vendor-err" aria-controls="vendorResults">
+      </div>
+      <div class="results" id="vendorResults"></div>
+    </div>
+    <div class="err" id="vendor-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="vendor-only" id="vendorOnly" hidden>
+  <div class="field">
+    <div class="label" id="vbLabel"><span>Vendor balance</span><span class="label-ta" lang="ta">நிலுவை</span></div>
+    <div class="ro" aria-labelledby="vbLabel" role="group">
+      <span class="num" id="vbText">₹0</span>
+      <svg class="lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+    </div>
+  </div>
+
+  <section class="locked" aria-labelledby="openTitle">
+    <div class="locked-head">
+      <h2 id="openTitle">Open bills <span class="label-ta" lang="ta">நிலுவை பில்கள்</span> <span class="count num" id="openCount">0</span></h2>
+      <svg class="lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+    </div>
+    <div id="openList"></div>
+  </section>
+
+  <section class="locked" aria-labelledby="closedTitle">
+    <div class="locked-head">
+      <h2 id="closedTitle">Closed bills <span class="label-ta" lang="ta">முடிந்த பில்கள்</span> <span class="count num" id="closedCount">0</span></h2>
+      <svg class="lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+    </div>
+    <div id="closedList"></div>
+  </section>
+
+  <section class="locked" aria-labelledby="paysTitle">
+    <div class="locked-head">
+      <h2 id="paysTitle">Payment history <span class="label-ta" lang="ta">செலுத்திய விவரம்</span> <span class="count num" id="paysCount">0</span></h2>
+      <svg class="lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+    </div>
+    <div id="paysList"></div>
+  </section>
+  </div>
+
+  <div class="field" data-field="amount">
+    <label class="label" for="amount"><span>Amount</span><span class="label-ta" lang="ta">தொகை</span></label>
+    <div class="control">
+      <span class="prefix" aria-hidden="true">₹</span>
+      <input id="amount" class="num" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="next" aria-describedby="amount-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="amount-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" id="afterField" hidden>
+    <div class="label" id="afterLabel"><span>Balance after payment</span><span class="label-ta" lang="ta">செலுத்திய பின் நிலுவை</span></div>
+    <div class="ro" aria-labelledby="afterLabel" role="group">
+      <span class="num after" id="afterText">₹0</span>
+      <svg class="lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+    </div>
+  </div>
+
+  <fieldset class="field" data-field="mode" aria-describedby="mode-err">
+    <legend class="label"><span>Payment mode</span><span class="label-ta" lang="ta">செலுத்தும் முறை</span></legend>
+    <div class="choice">
+      <label><input type="radio" name="mode" value="Cash"><span>Cash</span></label>
+      <label><input type="radio" name="mode" value="UPI"><span>UPI</span></label>
+      <label><input type="radio" name="mode" value="Bank"><span>Bank</span></label>
+    </div>
+    <div class="err" id="mode-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </fieldset>
+
+  <div class="field" data-field="payDate">
+    <label class="label" for="payDate"><span>Payment date</span><span class="label-ta" lang="ta">செலுத்திய தேதி</span></label>
+    <div class="control">
+      <input id="payDate" class="num" type="date" aria-describedby="payDate-err">
+      <svg class="ok" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <div class="err" id="payDate-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span></span></div>
+  </div>
+
+  <div class="field" data-field="ref">
+    <label class="label" for="ref"><span>Reference number<span class="opt">Optional</span></span><span class="label-ta" lang="ta">குறிப்பு எண்</span></label>
+    <div class="control">
+      <input id="ref" class="num" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done">
+    </div>
+  </div>
+
+</main>
+
+<div class="bar">
+  <p class="save-err" id="saveErr" role="alert"></p>
+  <button type="submit" class="btn" id="saveBtn"><span id="saveText">Save payment</span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+  </button>
+</div>
+</form>
+
+<section class="done" id="done" hidden aria-labelledby="doneTitle">
+  <div class="done-head">
+    <div class="tick" aria-hidden="true">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+    </div>
+    <h2 id="doneTitle" tabindex="-1">Payment saved</h2>
+    <p class="ta-sub" lang="ta">சேமிக்கப்பட்டது</p>
+  </div>
+
+  <article class="vcard" aria-label="Payment details">
+    <div class="v-name" id="dVendor"></div>
+    <div class="v-sub num" id="dMeta"></div>
+    <div class="v-rows">
+      <div class="v-row big"><span class="k">Amount</span><span class="num" id="dAmount"></span></div>
+    </div>
+    <div class="v-rows">
+      <div class="v-row"><span class="k">Vendor balance</span><span class="num" id="dBal"></span></div>
+      <div class="v-row"><span class="k">Balance after payment</span><span class="num" id="dAfter" style="color:var(--gold);font-weight:700"></span></div>
+      
+    </div>
+  </article>
+
+  <div class="actions">
+    <button type="button" class="btn" id="anotherBtn">Add another payment</button>
+    <button type="button" class="btn ghost" id="editBtn">Edit</button>
+  </div>
+</section>
+
+<p class="sr" id="live" aria-live="polite"></p>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API_URL = (window.LS_CONFIG && window.LS_CONFIG.apiUrl) || 'PASTE-EXEC-LINK';   // set in config.js
+</script>
+<script>
+/* ---------- PIN, login from the home screen, and the link to the sheet ---------- */
+// The home screen (index.html) keeps the PIN for this browser tab only, so this page opens without asking again.
+// It is cleared by Lock, by closing the tab, or after 12 hours.
+var LS = (function () {
+  var API_READY = /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(API_URL);
+  var SESSION_KEY = 'ls-session', SESSION_HOURS = 12, PIN_LENGTH = 6;
+  var app = document.querySelector('.app');
+  var pinView = document.getElementById('pinView');
+  var pin = '', typed = '', busy = false, cfg = null;
+  function el(id) { return document.getElementById(id); }
+  try { localStorage.removeItem('ls-coconut-pin'); localStorage.removeItem('ls-owner-pin'); } catch (e) {}
+
+  function readSession() {
+    try {
+      var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.pin && s.until > Date.now()) return s;
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+    return null;
+  }
+  function writeSession(p, who) {
+    try {
+      var old = readSession(), same = old && old.pin === p;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        pin: p, name: who.name, role: who.role,
+        pages: same ? (old.pages || []) : [],
+        until: same ? old.until : Date.now() + SESSION_HOURS * 3600 * 1000
+      }));
+    } catch (e) {}
+  }
+  function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {} }
+
+  // Sends a request to the Apps Script and returns its data. No Google sign-in is sent.
+  async function call(action, payload) {
+    var body = Object.assign({ action: action, pin: pin }, payload || {});
+    if (!API_READY) throw new Error('This page is not connected yet: add the Apps Script link in config.js.');
+    var res;
+    try {
+      var r = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body),
+        credentials: 'omit',
+        redirect: 'follow'
+      });
+      res = await r.json();
+    } catch (e) {
+      throw new Error('Could not reach the sheet. Check the internet and try again.');
+    }
+    if (!res || res.ok !== true) throw new Error((res && res.error) || 'Something went wrong. Try again.');
+    return res.data;
+  }
+  function errText(err) {
+    var m = (err && err.message) ? err.message : String(err || '');
+    return m.replace(/^(Exception|Error):\s*/i, '') || 'Something went wrong. Try again.';
+  }
+  function isPinError(err) { return /PIN/.test(errText(err)); }
+
+  function setMsg(t, bad) { var m = el('pinMsg'); m.textContent = t; m.classList.toggle('bad', !!bad); }
+  function renderDots() { pinView.querySelectorAll('.dot').forEach(function (d, i) { d.classList.toggle('on', i < typed.length); }); }
+  function setKeys(on) { pinView.querySelectorAll('.pkey').forEach(function (k) { k.disabled = !on; }); }
+  function shake() { var d = el('dots'); d.classList.remove('wrong'); void d.offsetWidth; d.classList.add('wrong'); }
+
+  function press(k) {
+    if (busy) return;
+    if (k === 'back') typed = typed.slice(0, -1);
+    else if (k === 'clear') typed = '';
+    else if (typed.length < PIN_LENGTH) typed += k;
+    el('dots').classList.remove('wrong');
+    setMsg('');
+    renderDots();
+    if (typed.length === PIN_LENGTH) tryPin(typed);
+  }
+
+  async function tryPin(p, quiet) {
+    busy = true; setKeys(false); setMsg(quiet ? 'Opening…' : 'Checking…');
+    try {
+      var me = await call('login', { pin: p, page: cfg.page });
+      pin = p;
+      writeSession(p, me);
+      typed = ''; renderDots(); setMsg('');
+      el('whoName').textContent = me.name || '';
+      app.classList.remove('pin-on');
+      window.scrollTo(0, 0);
+      if (cfg.onLogin) cfg.onLogin(me);
+    } catch (err) {
+      typed = ''; renderDots();
+      if (!quiet) shake();
+      if (/Wrong PIN/.test(errText(err))) clearSession();
+      setMsg(errText(err), true);
+    } finally {
+      busy = false; setKeys(true);
+    }
+  }
+
+  function lockOut(message) {
+    pin = ''; typed = ''; renderDots();
+    app.classList.add('pin-on');
+    setMsg(message || '', true);
+    window.scrollTo(0, 0);
+  }
+  // Call from a page's catch: returns true when the error was about the PIN and the PIN screen is shown.
+  function handle(err) {
+    if (!isPinError(err)) return false;
+    if (/Wrong PIN/.test(errText(err))) clearSession();
+    lockOut(errText(err));
+    return true;
+  }
+
+  pinView.querySelectorAll('.pkey').forEach(function (b) { b.addEventListener('click', function () { press(b.dataset.key); }); });
+  document.addEventListener('keydown', function (e) {
+    if (!app.classList.contains('pin-on')) return;
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    else if (e.key === 'Backspace') press('back');
+    else if (e.key === 'Escape') press('clear');
+  });
+  el('lockBtn').addEventListener('click', function () { clearSession(); window.location.href = 'index.html'; });
+
+  function start(c) {
+    cfg = c;
+    if (!API_READY) { setKeys(false); setMsg('This page is not connected yet: add the Apps Script link in config.js.', true); return; }
+    var s = readSession();
+    if (s) tryPin(s.pin, true);
+  }
+
+  return { start: start, call: call, errText: errText, handle: handle, locked: function () { return app.classList.contains('pin-on'); } };
+})();
+
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('payForm');
+  var head = $('formHead');
+  var done = $('done');
+
+  /* Vendors from the sheet, each with balance, advance held, bills (with due / last payment / closed date)
+     and payments. The sheet works these out by replaying bills and payments, oldest bills first. */
+  var VENDORS = [];
+  var loaded = false;
+  var SHOW = 3;
+  var expanded = {};
+  var vendor = null;
+  var touched = {};
+  var savedId = '';          // set after the first save; Edit + Save then updates the same payment
+  var preSave = null;        // the vendor as it was before this payment, for Edit
+  var saving = false;
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  var now = new Date();
+  var todayStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+  $('payDate').max = todayStr;
+  $('payDate').value = todayStr;
+
+  function toNum(s) {
+    s = String(s == null ? '' : s).replace(/,/g, '').trim();
+    if (s === '' || s === '.') return NaN;
+    var n = Number(s);
+    return isFinite(n) ? n : NaN;
+  }
+  function plain(s) { return String(s || '').replace(/,/g, '').replace(/\.$/, ''); }
+  function round2(n) { return Math.round(n * 100) / 100; }
+  function money(n) {
+    n = round2(n || 0);
+    var hasPaise = Math.abs(n % 1) > 0.0001;
+    return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: hasPaise ? 2 : 0, maximumFractionDigits: 2 });
+  }
+  function cleanDecimal(s) {
+    s = String(s || '').replace(/[^\d.]/g, '');
+    var i = s.indexOf('.');
+    if (i !== -1) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, '').slice(0, 2);
+    s = s.replace(/^0+(?=\d)/, '');
+    var parts = s.split('.');
+    var whole = parts[0].slice(0, 9);
+    var withCommas = whole === '' ? '' : Number(whole).toLocaleString('en-IN');
+    return parts.length > 1 ? withCommas + '.' + parts[1] : withCommas;
+  }
+  function fmtDate(v) {
+    if (!v || /^0000/.test(v)) return '—';
+    try { return new Date(v + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch (err) { return v; }
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function radio(n) { var r = form.querySelector('input[name="' + n + '"]:checked'); return r ? r.value : ''; }
+  function announce(t) { $('live').textContent = ''; setTimeout(function () { $('live').textContent = t; }, 30); }
+  function byDateDesc(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }
+
+  /* ---------- vendor picker ---------- */
+  function renderResults() {
+    if (!loaded) { $('vendorResults').innerHTML = '<div class="res-none">Loading…</div>'; return; }
+    var q = $('vendorSearch').value.trim().toLowerCase();
+    var list = VENDORS.filter(function (v) {
+      return !q || v.name.toLowerCase().indexOf(q) !== -1 || String(v.contact || '').toLowerCase().indexOf(q) !== -1;
+    });
+    $('vendorResults').innerHTML = list.length ? list.map(function (v) {
+      return '<button type="button" class="res" data-id="' + esc(v.id) + '"><span><b>' + esc(v.name) + '</b><small>' + esc(v.contact || '') + '</small></span><span class="bal">' + money(v.balance) + ' due</span></button>';
+    }).join('') : '<div class="res-none">No vendor found</div>';
+  }
+  function pickVendor(v, silent) {
+    vendor = v;
+    if (!silent) expanded = {};
+    $('pickedName').textContent = v.name;
+    $('pickedMeta').textContent = v.contact || '';
+    $('vendorPicked').hidden = false;
+    $('vendorPicker').hidden = true;
+    if (!silent) { touched.vendor = true; check('vendor', true); }
+    renderVendor();
+    recalc();
+  }
+  function clearVendor() {
+    vendor = null;
+    $('vendorPicked').hidden = true;
+    $('vendorPicker').hidden = false;
+    $('vendorSearch').value = '';
+    renderResults();
+    renderVendor();
+    recalc();
+  }
+  function putVendor(v) {
+    VENDORS = VENDORS.map(function (x) { return x.id === v.id ? v : x; });
+  }
+  $('vendorResults').addEventListener('click', function (e) {
+    var b = e.target.closest('button.res');
+    if (!b) return;
+    var v = VENDORS.filter(function (x) { return x.id === b.getAttribute('data-id'); })[0];
+    if (v) pickVendor(v);
+  });
+  $('vendorSearch').addEventListener('input', renderResults);
+  $('vendorSearch').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      var first = $('vendorResults').querySelector('button.res');
+      if (first) first.click();
+    }
+  });
+  $('changeVendor').addEventListener('click', function () {
+    clearVendor();
+    $('vendorSearch').focus();
+    check('vendor', !!touched.vendor);
+  });
+
+  /* ---------- vendor histories (read-only) ---------- */
+  function listHtml(key, rows, rowFn, emptyText) {
+    if (!rows.length) return '<div class="h-none">' + emptyText + '</div>';
+    var show = expanded[key] ? rows : rows.slice(0, SHOW);
+    var html = show.map(rowFn).join('');
+    if (rows.length > SHOW) {
+      html += '<button type="button" class="more" data-key="' + key + '">' + (expanded[key] ? 'Show less' : 'Show all ' + rows.length) + '</button>';
+    }
+    return html;
+  }
+  function billCell(b) {
+    return '<span class="bc"><span class="num">' + esc(b.no || '—') + '</span><small class="num">' + fmtDate(b.date) + '</small></span>';
+  }
+  function renderVendor() {
+    $('vendorOnly').hidden = !vendor;
+    if (!vendor) return;
+    var open = vendor.bills.filter(function (b) { return b.due > 0; }).sort(byDateDesc);
+    var closed = vendor.bills.filter(function (b) { return b.due <= 0; }).sort(function (a, b) { return a.closed < b.closed ? 1 : a.closed > b.closed ? -1 : byDateDesc(a, b); });
+    var pays = vendor.payments.slice().sort(byDateDesc);
+    $('openCount').textContent = open.length;
+    $('closedCount').textContent = closed.length;
+    $('paysCount').textContent = pays.length;
+    $('openList').innerHTML = listHtml('open', open, function (b) {
+      return '<div class="hrow bill open">' + billCell(b) + '<span class="c2 num">' + (b.last ? fmtDate(b.last) : '—') + '</span><span class="c3 num">' + money(b.due) + '</span></div>';
+    }, 'No open bills');
+    $('closedList').innerHTML = listHtml('closed', closed, function (b) {
+      return '<div class="hrow bill closed">' + billCell(b) + '<span class="c2 num">' + fmtDate(b.closed) + '</span><span class="c3 num">' + money(b.amount) + '</span></div>';
+    }, 'No closed bills');
+    $('paysList').innerHTML = listHtml('pays', pays, function (p) {
+      return '<div class="hrow pay"><span class="num">' + fmtDate(p.date) + '</span><span class="c2 num">' + money(p.amount) + '</span><span class="c3">' + esc(p.mode) + '</span></div>';
+    }, 'No payments yet');
+  }
+  $('vendorOnly').addEventListener('click', function (e) {
+    var b = e.target.closest('button.more');
+    if (!b) return;
+    var k = b.getAttribute('data-key');
+    expanded[k] = !expanded[k];
+    renderVendor();
+  });
+
+  /* ---------- amount and balance ---------- */
+  function figures() {
+    var amt = toNum($('amount').value);
+    amt = amt > 0 ? round2(amt) : 0;
+    var before = vendor ? vendor.balance : 0;
+    var held = vendor ? vendor.advance : 0;
+    return { amt: amt, before: before, held: held, after: round2(Math.max(before - amt, 0)), advance: round2(Math.max(amt - before, 0) + held) };
+  }
+  function recalc() {
+    var t = figures();
+    $('vbText').innerHTML = money(t.before) + (t.held > 0 ? ' <span class="adv">+ ' + money(t.held) + ' advance</span>' : '');
+    $('afterField').hidden = !vendor;
+    $('afterText').innerHTML = money(t.after) + (t.advance > 0 ? ' <span class="adv">+ ' + money(t.advance) + ' advance</span>' : '');
+    $('saveText').textContent = saving ? 'Saving…' : (t.amt > 0 ? 'Save payment · ' + money(t.amt) : 'Save payment');
+  }
+
+  $('amount').addEventListener('input', function () {
+    $('amount').value = cleanDecimal($('amount').value);
+    recalc();
+    if (touched.amount) check('amount', true);
+  });
+  $('amount').addEventListener('blur', function () {
+    if ($('amount').value !== '') touched.amount = true;
+    check('amount', !!touched.amount);
+  });
+  form.querySelectorAll('input[name="mode"]').forEach(function (r) {
+    r.addEventListener('change', function () { touched.mode = true; check('mode', true); });
+  });
+  $('payDate').addEventListener('change', function () { touched.payDate = true; check('payDate', true); });
+
+  /* ---------- validation ---------- */
+  var rules = {
+    vendor: function () { return vendor ? '' : 'Pick the vendor'; },
+    amount: function () { return toNum($('amount').value) > 0 ? '' : 'Type the amount'; },
+    mode: function () { return radio('mode') ? '' : 'Pick Cash, UPI or Bank'; },
+    payDate: function () {
+      var v = $('payDate').value;
+      if (!v) return 'Pick the payment date';
+      return v > todayStr ? 'Payment date cannot be in the future' : '';
+    }
+  };
+  function fieldEl(k) { return form.querySelector('[data-field="' + k + '"]'); }
+  function check(k, show) {
+    var msg = rules[k]();
+    var el = fieldEl(k);
+    if (show) {
+      el.classList.toggle('invalid', !!msg);
+      var span = el.querySelector(':scope > .err span');
+      if (span) span.textContent = msg;
+    } else if (!msg) {
+      el.classList.remove('invalid');
+    }
+    var hasVal = k === 'vendor' ? !!vendor : (k === 'mode' ? !!radio('mode') : !!$(k).value);
+    el.classList.toggle('valid', !msg && hasVal);
+    return msg;
+  }
+
+  form.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.id === 'vendorSearch') return;
+    var t = e.target;
+    if (t.tagName !== 'INPUT' || t.type === 'radio') return;
+    e.preventDefault();
+    var list = Array.prototype.filter.call(form.querySelectorAll('input[type="text"], input[type="date"]'), function (i) { return i.offsetParent !== null; });
+    var idx = list.indexOf(t);
+    if (idx > -1 && idx + 1 < list.length) list[idx + 1].focus();
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (saving) return;
+    var firstEl = null;
+    ['vendor', 'amount', 'mode', 'payDate'].forEach(function (k) {
+      touched[k] = true;
+      if (check(k, true) && !firstEl) firstEl = fieldEl(k);
+    });
+    if (firstEl) {
+      try { firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (err) { firstEl.scrollIntoView(); }
+      var target = firstEl.querySelector('input:not([type="radio"])') || firstEl.querySelector('input');
+      if (target && target.offsetParent !== null) {
+        try { target.focus({ preventScroll: true }); } catch (err) { target.focus(); }
+      }
+      announce('Please fix the highlighted field');
+      return;
+    }
+    save();
+  });
+
+  /* ---------- save: the sheet records the payment and settles the oldest bills first ---------- */
+  async function save() {
+    saving = true;
+    $('saveBtn').disabled = true;
+    $('saveErr').textContent = '';
+    recalc();
+    var was = vendor;
+    try {
+      var res = await LS.call('savePayment', { payment: {
+        id: savedId,
+        vendorId: vendor.id,
+        date: $('payDate').value,
+        mode: radio('mode'),
+        amount: plain($('amount').value),
+        ref: $('ref').value.trim()
+      } });
+      savedId = res.id;
+      preSave = was;
+      if (res.vendor) { putVendor(res.vendor); vendor = res.vendor; }
+      showDone(res);
+    } catch (err) {
+      if (LS.handle(err)) return;
+      $('saveErr').textContent = LS.errText(err);
+    } finally {
+      saving = false;
+      $('saveBtn').disabled = false;
+      recalc();
+    }
+  }
+  function showDone(res) {
+    var amt = round2(toNum($('amount').value));
+    var ref = $('ref').value.trim();
+    $('dVendor').textContent = vendor.name;
+    $('dMeta').textContent = fmtDate($('payDate').value) + ' · ' + radio('mode') + (ref ? ' · ' + ref : '') + ' · ' + res.id;
+    $('dAmount').textContent = money(amt);
+    $('dBal').textContent = money(res.before) + (res.beforeAdvance > 0 ? ' + ' + money(res.beforeAdvance) + ' advance' : '');
+    $('dAfter').textContent = money(res.after) + (res.advance > 0 ? ' + ' + money(res.advance) + ' advance' : '');
+    form.hidden = true;
+    head.hidden = true;
+    done.hidden = false;
+    window.scrollTo(0, 0);
+    $('doneTitle').focus();
+  }
+  function showForm() {
+    done.hidden = true;
+    head.hidden = false;
+    form.hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  // Edit shows the vendor as it was before this payment; saving again updates the same payment.
+  $('editBtn').addEventListener('click', function () {
+    if (preSave) { putVendor(preSave); pickVendor(preSave, true); }
+    renderVendor();
+    recalc();
+    showForm();
+  });
+
+  $('anotherBtn').addEventListener('click', function () {
+    savedId = '';
+    preSave = null;
+    form.reset();
+    touched = {};
+    clearVendor();
+    $('saveErr').textContent = '';
+    $('payDate').value = todayStr;
+    form.querySelectorAll('.field').forEach(function (el) { el.classList.remove('invalid', 'valid'); });
+    check('payDate', false);
+    showForm();
+    $('vendorSearch').focus();
+  });
+
+  async function loadVendors() {
+    loaded = false;
+    renderResults();
+    try {
+      VENDORS = await LS.call('vendorBooks', { page: 'payments' });
+      loaded = true;
+      renderResults();
+      if (vendor) {
+        var v = VENDORS.filter(function (x) { return x.id === vendor.id; })[0];
+        if (v) pickVendor(v, true); else clearVendor();
+      }
+    } catch (err) {
+      if (LS.handle(err)) return;
+      $('vendorResults').innerHTML = '<div class="res-none">' + esc(LS.errText(err)) + '</div>';
+    }
+  }
+
+  renderResults();
+  renderVendor();
+  recalc();
+  check('payDate', false);
+  LS.start({ page: 'payments', onLogin: loadVendors });
+})();
+</script>
+</body>
+</html>
